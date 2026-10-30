@@ -125,9 +125,9 @@ body::before{
 .sc-sep{height:1px;background:var(--line-soft);margin:6px 0}
 .sc-list{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
 .sc-item{
-  flex:1 1 158px;min-width:0;
+  flex:1 1 158px;min-width:0;height:52px;
   display:flex;flex-direction:column;justify-content:center;gap:1px;
-  padding:6px 11px;border-radius:12px;
+  padding:0 11px;border-radius:12px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.045);
   animation:scIn .65s cubic-bezier(.19,1.28,.32,1) both;
 }
@@ -157,10 +157,12 @@ body::before{
   letter-spacing:.01em;font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 .schedule.dense .sc-name{font-size:15px}
-.schedule.dense .sc-item{padding:4px 10px}
+.schedule.dense .sc-item{height:46px;padding:0 10px}
 .schedule.dense .sc-where{font-size:11px}
+.schedule.dense .sc-empty{height:46px}
 .sc-empty{
-  flex:1 1 100%;display:flex;align-items:center;justify-content:center;min-height:28px;max-height:38px;
+  flex:1 1 100%;height:52px;
+  display:flex;align-items:center;justify-content:center;
   font-size:12px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
   border-radius:12px;letter-spacing:.03em;
 }
@@ -894,6 +896,9 @@ function drawElo(matches, curElo, color){
   lo -= padV; hi += padV;
   if (hi - lo < 20){ const c = (hi+lo)/2; lo = c-10; hi = c+10; }
 
+  // 视野内所有段位分界线
+  const tierLines = TIERS.filter(t => t.min > 0 && t.min >= lo && t.min <= hi);
+
   const nx = i => XL + (i/(pts.length-1)) * plotW;
   const ny = v => PT + (1 - (v-lo)/(hi-lo)) * plotH;
 
@@ -906,7 +911,7 @@ function drawElo(matches, curElo, color){
   const step = Math.max(10, Math.ceil(rawStep / mag) * mag);
   for (let v = Math.ceil(lo / step) * step; v <= hi; v += step){
     // 与段位线重合时刻度照写数字，只是不再画灰色虚线（那条线已经由段位线占据）
-    const atTier = tierVal !== null && Math.abs(v - tierVal) < step * 0.5;
+    const atTier = tierLines.some(t => Math.abs(v - t.min) < step * 0.5);
     const y = ny(v);
     if (!atTier){
       const ln = document.createElementNS(NS, "line");
@@ -929,33 +934,46 @@ function drawElo(matches, curElo, color){
     grid.appendChild(tx);
   }
 
-  // 段位分界线
+  // 段位分界线：右侧标注 "900 · GOLD"
   const tg = $("eloTierG");
   tg.textContent = "";
-  if (tierVal !== null){
-    const y = ny(tierVal);
+  for (const t of tierLines){
+    const y = ny(t.min);
     const ln = document.createElementNS(NS, "line");
-    ln.setAttribute("x1", XL); ln.setAttribute("x2", W-XR);
+    ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
     ln.setAttribute("y1", y); ln.setAttribute("y2", y);
-    ln.setAttribute("stroke", up.color);
+    ln.setAttribute("stroke", t.color);
     ln.setAttribute("stroke-width", "1.3");
     ln.setAttribute("stroke-dasharray", "8 5");
     ln.setAttribute("opacity", ".85");
     tg.appendChild(ln);
 
+    const label = t.min + " · " + t.name.toUpperCase();
     const tx = document.createElementNS(NS, "text");
-    tx.setAttribute("x", XL + 38);
+    tx.setAttribute("x", W - XR - 8);
     tx.setAttribute("y", y - 7);
-    tx.setAttribute("text-anchor", "start");
+    tx.setAttribute("text-anchor", "end");
     tx.setAttribute("font-size", "12");
     tx.setAttribute("font-weight", "700");
-    tx.setAttribute("letter-spacing", ".07em");
-    tx.setAttribute("fill", up.color);
-    tx.setAttribute("stroke", "#0a0d13");
-    tx.setAttribute("stroke-width", "3.5");
-    tx.setAttribute("paint-order", "stroke");
-    tx.textContent = up.name.toUpperCase();
+    tx.setAttribute("letter-spacing", ".06em");
+    tx.setAttribute("fill", t.color);
+    tx.textContent = label;
     tg.appendChild(tx);
+
+    // 文字垫一层底色，避免和折线叠在一起看不清
+    const tw = (tx.getComputedTextLength && tx.getComputedTextLength()) || label.length * 7;
+    const bg = document.createElementNS(NS, "rect");
+    bg.setAttribute("x", W - XR - 8 - tw - 7);
+    bg.setAttribute("y", y - 18);
+    bg.setAttribute("width", tw + 14);
+    bg.setAttribute("height", 16);
+    bg.setAttribute("rx", 5);
+    bg.setAttribute("fill", "#0b0f16");
+    bg.setAttribute("opacity", ".92");
+    bg.setAttribute("stroke", t.color);
+    bg.setAttribute("stroke-opacity", ".35");
+    bg.setAttribute("stroke-width", "1");
+    tg.insertBefore(bg, tx);
   }
 
   // 按段位区域切分折线：每条边都在穿越阈值处打断，颜色取该段中点所在区域
