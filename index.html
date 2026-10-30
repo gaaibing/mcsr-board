@@ -143,7 +143,7 @@ body::before{
 .pg-card{
   --p:0%;--fill:rgba(92,200,255,.20);
   position:relative;overflow:hidden;isolation:isolate;
-  flex:0 0 auto;width:96px;border-radius:14px;padding:0 6px;
+  flex:0 0 auto;width:100px;border-radius:14px;padding:0 6px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.055);
   transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
@@ -753,7 +753,7 @@ function fmtCd(sec){
   sec = Math.max(0, Math.floor(sec));
   if (sec < 60) return sec + "s";
   if (sec < 3600) return Math.floor(sec/60) + "m" + pad(sec%60) + "s";
-  return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60));
+  return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60)) + "m";
 }
 
 function plugShell(){
@@ -1491,53 +1491,54 @@ function drawElo(matches, curElo, color){
   placeLatestCard(xy, W, H, axisPts, XL);
 }
 
-/* 悬浮卡片自动选角落：优先顺序 右上 → 右下 → 左下 → 左上，压到坐标轴重罚 */
-let __ltSpot = -1, __ltBlock = Infinity;
+/* 悬浮卡片自动找空位：在图内按网格搜一遍，挑遮挡分最低的位置；同分靠右上 */
+let __ltPos = null, __ltBlock = Infinity;
 function placeLatestCard(xy, W, H, axisPts, XL){
   const card = $("ltCard");
   if (!card || card.style.display === "none") return;
   const cw = card.offsetWidth || 268;
   const ch = card.offsetHeight || 62;
-  const gap = 4;
-  const leftX = XL + 2;                            // 左侧不越过 y 轴刻度
-  const spots = [
-    { x: W - cw - 2, y: gap },                     // 0 右上
-    { x: W - cw - 2, y: H - ch - gap },            // 1 右下
-    { x: leftX, y: H - ch - gap },                 // 2 左下
-    { x: leftX, y: gap },                           // 3 左上
-  ];
+
+  const minX = XL + 2, maxX = W - cw - 2;
+  const minY = 4, maxY = H - ch - 4;
+  if (maxX < minX || maxY < minY){          // 图太窄放不下，退回右上角
+    __ltPos = null;
+    card.style.right = "2px"; card.style.left = "auto"; card.style.top = "4px";
+    return;
+  }
+
   const samples = [];
   for (let i = 1; i < xy.length; i++){
     const a = xy[i-1], b = xy[i];
-    for (let k = 0; k <= 14; k++){
-      samples.push({ x: a.x + (b.x - a.x) * k / 14, y: a.y + (b.y - a.y) * k / 14, w: 1 });
+    for (let k = 0; k <= 10; k++){
+      samples.push({ x: a.x + (b.x - a.x) * k / 10, y: a.y + (b.y - a.y) * k / 10, w: 1 });
     }
   }
-  // 最新那个点权重大一些，尽量别盖住
   const last = xy[xy.length - 1];
-  for (let i = 0; i < 6; i++) samples.push({ x: last.x, y: last.y, w: 1 });
-
+  for (let i = 0; i < 5; i++) samples.push({ x: last.x, y: last.y, w: 1 });
   const all = samples.concat(axisPts || []);
-  const scores = spots.map(s => {
-    let n = 0;
-    for (const p of all){
-      if (p.x >= s.x - 8 && p.x <= s.x + cw + 8 && p.y >= s.y - 10 && p.y <= s.y + ch + 10) n += (p.w || 1);
+
+  const STEP = 10;
+  let bx = maxX, by = minY, bn = Infinity, bkey = Infinity;
+  for (let y = minY; y <= maxY; y += STEP){
+    for (let x = minX; x <= maxX; x += STEP){
+      let n = 0;
+      for (let i = 0; i < all.length; i++){
+        const p = all[i];
+        if (p.x >= x - 6 && p.x <= x + cw + 6 && p.y >= y - 8 && p.y <= y + ch + 8) n += (p.w || 1);
+      }
+      const key = n * 10000 + (maxX - x) + (y - minY) * 0.6;   // 同分时更偏右上
+      if (key < bkey){ bkey = key; bx = x; by = y; bn = n; }
     }
-    return n;
-  });
+  }
 
-  const TOL = 1;                                   // 遮挡 1 分以内认为「这块是空的」
-  let pick = scores.findIndex(v => v <= TOL);
-  if (pick < 0) pick = scores.indexOf(Math.min.apply(null, scores));
+  if (__ltPos && bn > __ltBlock - 3) return;    // 新位置好不了多少，别来回挪
+  __ltPos = { x: bx, y: by };
+  __ltBlock = bn;
 
-  if (pick === __ltSpot) return;
-  if (__ltSpot >= 0 && scores[pick] > __ltBlock - 3) return;   // 换过去也好不了多少就不挪
-  __ltSpot = pick;
-  __ltBlock = scores[pick];
-  const s = spots[pick];
   card.style.right = "auto";
-  card.style.left = Math.max(0, Math.min(Math.round(s.x), W - cw)) + "px";
-  card.style.top = Math.round(s.y) + "px";
+  card.style.left = Math.round(bx) + "px";
+  card.style.top = Math.round(by) + "px";
 }
 
 /* ============ 近 10 场 ============ */
@@ -1718,6 +1719,7 @@ armSwap();
 window.addEventListener("resize", () => {
   clearTimeout(window.__rz);
   window.__rz = setTimeout(() => {
+    __ltPos = null;
     if (__eloCache) drawElo.apply(null, __eloCache);
     if (__wx) paintWeather(__wx);
   }, 280);
