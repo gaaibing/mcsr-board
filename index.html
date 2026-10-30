@@ -340,13 +340,13 @@ body::before{
 .ch-wrap{position:relative;flex:1;min-height:0;margin-top:8px}
 /* 折线右上角：最新一局 */
 .lt-card{
-  position:absolute;top:4px;right:2px;z-index:2;pointer-events:none;width:268px;
+  position:absolute;bottom:6px;right:2px;top:auto;left:auto;z-index:2;pointer-events:none;width:268px;
   display:flex;align-items:stretch;padding:9px 12px 10px;border-radius:14px;
   background:rgba(13,17,24,.9);border:1px solid rgba(255,255,255,.075);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   box-shadow:0 12px 30px -16px rgba(0,0,0,.95);
   font-variant-numeric:tabular-nums;
-  transition:left .38s cubic-bezier(.22,.92,.26,1),top .38s cubic-bezier(.22,.92,.26,1);
+  opacity:.85;
 }
 .lt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;padding-right:11px}
 .lt-top{display:flex;align-items:baseline;gap:9px;margin-bottom:2px}
@@ -1332,7 +1332,6 @@ function drawElo(matches, curElo, color){
 
   // 视野内所有段位分界线
   const tierLines = TIERS.filter(t => t.min > 0 && t.min >= lo && t.min <= hi);
-  const axisPts = [];   // 坐标轴刻度/段位标签位置，卡片压上去要重罚
 
   const nx = i => XL + (i/(pts.length-1)) * plotW;
   const ny = v => PT + (1 - (v-lo)/(hi-lo)) * plotH;
@@ -1344,7 +1343,6 @@ function drawElo(matches, curElo, color){
     // 与段位线重合时刻度照写数字，只是不再画灰色虚线（那条线已经由段位线占据）
     const atTier = tierLines.some(t => Math.abs(v - t.min) < step * 0.5);
     const y = ny(v);
-    axisPts.push({ x: 22, y: y, w: 8 });
     if (!atTier){
       const ln = document.createElementNS(NS, "line");
       ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
@@ -1371,7 +1369,6 @@ function drawElo(matches, curElo, color){
   tg.textContent = "";
   for (const t of tierLines){
     const y = ny(t.min);
-    axisPts.push({ x: W - 70, y: y, w: 8 });
     const ln = document.createElementNS(NS, "line");
     ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
     ln.setAttribute("y1", y); ln.setAttribute("y2", y);
@@ -1487,58 +1484,6 @@ function drawElo(matches, curElo, color){
     dot.style.transition = "none";
     dot.style.opacity = 1;
   }
-
-  placeLatestCard(xy, W, H, axisPts, XL);
-}
-
-/* 悬浮卡片自动找空位：在图内按网格搜一遍，挑遮挡分最低的位置；同分靠右上 */
-let __ltPos = null, __ltBlock = Infinity;
-function placeLatestCard(xy, W, H, axisPts, XL){
-  const card = $("ltCard");
-  if (!card || card.style.display === "none") return;
-  const cw = card.offsetWidth || 268;
-  const ch = card.offsetHeight || 62;
-
-  const minX = XL + 2, maxX = W - cw - 2;
-  const minY = 4, maxY = H - ch - 4;
-  if (maxX < minX || maxY < minY){          // 图太窄放不下，退回右上角
-    __ltPos = null;
-    card.style.right = "2px"; card.style.left = "auto"; card.style.top = "4px";
-    return;
-  }
-
-  const samples = [];
-  for (let i = 1; i < xy.length; i++){
-    const a = xy[i-1], b = xy[i];
-    for (let k = 0; k <= 10; k++){
-      samples.push({ x: a.x + (b.x - a.x) * k / 10, y: a.y + (b.y - a.y) * k / 10, w: 1 });
-    }
-  }
-  const last = xy[xy.length - 1];
-  for (let i = 0; i < 5; i++) samples.push({ x: last.x, y: last.y, w: 1 });
-  const all = samples.concat(axisPts || []);
-
-  const STEP = 10;
-  let bx = maxX, by = minY, bn = Infinity, bkey = Infinity;
-  for (let y = minY; y <= maxY; y += STEP){
-    for (let x = minX; x <= maxX; x += STEP){
-      let n = 0;
-      for (let i = 0; i < all.length; i++){
-        const p = all[i];
-        if (p.x >= x - 6 && p.x <= x + cw + 6 && p.y >= y - 8 && p.y <= y + ch + 8) n += (p.w || 1);
-      }
-      const key = n * 10000 + (maxX - x) + (y - minY) * 0.6;   // 同分时更偏右上
-      if (key < bkey){ bkey = key; bx = x; by = y; bn = n; }
-    }
-  }
-
-  if (__ltPos && bn > __ltBlock - 3) return;    // 新位置好不了多少，别来回挪
-  __ltPos = { x: bx, y: by };
-  __ltBlock = bn;
-
-  card.style.right = "auto";
-  card.style.left = Math.round(bx) + "px";
-  card.style.top = Math.round(by) + "px";
 }
 
 /* ============ 近 10 场 ============ */
@@ -1719,7 +1664,6 @@ armSwap();
 window.addEventListener("resize", () => {
   clearTimeout(window.__rz);
   window.__rz = setTimeout(() => {
-    __ltPos = null;
     if (__eloCache) drawElo.apply(null, __eloCache);
     if (__wx) paintWeather(__wx);
   }, 280);
