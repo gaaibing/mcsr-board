@@ -32,7 +32,7 @@ body::before{
 }
 .board{
   position:relative;z-index:1;height:100vh;height:100dvh;
-  display:grid;grid-template-columns:9fr 15fr;grid-template-rows:repeat(15,1fr);
+  display:grid;grid-template-columns:repeat(24,1fr);grid-template-rows:repeat(20,1fr);
   gap:15px;padding:17px;
 }
 .tile{
@@ -50,29 +50,31 @@ body::before{
 }
 @keyframes tileIn{0%{opacity:0;transform:translateY(28px) scale(.955)}60%{opacity:1}100%{opacity:1;transform:none}}
 
-.clock{grid-area:1/1/6/2;animation-delay:.04s}
-.weather{grid-area:6/1/11/2;animation-delay:.1s}
-.schedule{grid-area:11/1/16/2;animation-delay:.16s}
-.mcsr{grid-area:1/2/6/3;animation-delay:.22s}
-.swap{grid-area:6/2/16/3;animation-delay:.28s;padding:0;overflow:hidden}
+/* 拼贴布局：24 列 / 20 行，左右两侧的分割线各错开 45px，卡片高度也互不相等 */
+.clock{grid-area:1/1/8/8;animation-delay:.04s}
+.weather{grid-area:8/1/16/9;animation-delay:.1s}
+.schedule{grid-area:16/1/21/9;animation-delay:.16s}
+.mcsr{grid-area:1/8/8/25;animation-delay:.22s}
+.swap{grid-area:8/9/21/25;animation-delay:.28s;padding:0;overflow:hidden}
 
 /* ============ 时钟 ============ */
-.clock{flex-direction:row;align-items:center;gap:20px}
-.dial{width:clamp(96px,16vh,140px);flex:0 0 auto;aspect-ratio:1/1}
+/* 竖向时钟：窄卡（303px）下圆盘在上、日期时间在下 */
+.clock{flex-direction:column;align-items:center;justify-content:center;gap:0;padding:15px 20px 13px}
+.dial{width:clamp(80px,18vh,106px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
-.clock-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.c-date{font-size:clamp(18px,2.6vh,26px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
+.clock-info{flex:0 0 auto;width:100%;display:flex;flex-direction:column;justify-content:center;gap:1px;margin-top:3px}
+.c-date{font-size:clamp(16px,2.2vh,21px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15;text-align:center;white-space:nowrap}
 .c-date b{color:#fff}
-.c-sub{font-size:clamp(14px,2vh,18px);color:var(--dim);letter-spacing:.02em}
-.c-time{font-size:clamp(32px,5.4vh,54px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:6px}
+.c-sub{font-size:clamp(12px,1.55vh,14px);color:var(--dim);letter-spacing:.02em;text-align:center;white-space:nowrap}
+.c-time{font-size:clamp(28px,4.4vh,38px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:2px;text-align:center}
 .c-time small{font-size:.4em;font-weight:500;color:var(--dim-2);margin-left:.12em}
-.daybar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px}
+.daybar{height:5px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:7px}
 .daybar span{
   display:block;height:100%;border-radius:99px;width:0;
   background:linear-gradient(90deg,rgba(92,200,255,.9),rgba(160,108,255,.9));
   box-shadow:0 0 14px rgba(92,200,255,.5);transition:width 1s cubic-bezier(.22,.9,.28,1);
 }
-.daybar-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--dim-2);letter-spacing:.04em}
+.daybar-meta{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:11px;color:var(--dim-2);letter-spacing:.03em;white-space:nowrap;overflow:hidden}
 
 /* ============ 天气 ============ */
 .w-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
@@ -86,7 +88,7 @@ body::before{
 .w-desc{font-size:14.5px;color:var(--dim)}
 .w-facts{
   display:flex;flex-direction:column;align-items:flex-start;gap:3px;
-  margin-top:1px;
+  margin-top:8px;
 }
 .w-fact{font-size:13px;color:var(--dim-2)}
 .w-fact b{color:#c4cddd;font-weight:600}
@@ -98,10 +100,11 @@ body::before{
 .w-chart::-webkit-scrollbar{display:none}
 .w-chart svg{display:block;height:100%;overflow:visible}
 .w-sun{
-  display:flex;align-items:center;gap:22px;padding-top:8px;margin-top:2px;
-  border-top:1px solid var(--line-soft);font-size:13px;color:var(--dim-2);
+  display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:8px;margin-top:2px;
+  border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--dim-2);
+  white-space:nowrap;overflow:hidden;
 }
-.w-sun span{display:inline-flex;align-items:center;gap:6px}
+.w-sun span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .w-sun b{color:#c4cddd;font-weight:600}
 .ws-ic{width:16px;height:16px;flex:0 0 auto}
 .ws-ic.rise{color:#ffc46b}
@@ -727,7 +730,7 @@ function drawWeather(h, idx){
   const plotW = W - XL - XR, plotH = H - PT - PB;
   const vals = idx.map(i => h.temperature_2m[i]);
   let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
-  const padV = Math.max(1.5, (hi-lo)*0.4);
+  const padV = Math.max(1.5, (hi-lo)*0.75);
   lo -= padV; hi += padV;
 
   const nx = i => XL + (idx.length <= 1 ? plotW/2 : (i/(idx.length-1)) * plotW);
