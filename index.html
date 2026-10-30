@@ -378,9 +378,9 @@ body::before{
       </svg>
     </div>
     <div class="clock-info">
-      <div class="c-date" id="cDate">—</div>
+      <div class="c-date" id="cDate"><span id="cYear">—</span><b id="cMD"></b></div>
       <div class="c-sub" id="cSub">—</div>
-      <div class="c-time" id="cTime">--:--<small id="cSec">00</small></div>
+      <div class="c-time"><span id="cHM">--:--</span><small id="cSec">00</small></div>
       <div class="daybar"><span id="daybar"></span></div>
       <div class="daybar-meta"><span id="dayLeft">—</span><span id="dayPct">—</span></div>
     </div>
@@ -553,6 +553,7 @@ function hexA(hex,a){
 }
 
 const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad = n => String(n).padStart(2,"0");
 const NS = "http://www.w3.org/2000/svg";
 const ms2mmss = ms => {
@@ -640,6 +641,7 @@ function coursesOn(date, week){
   }
 })();
 
+let __lastDay = -1;
 function tickClock(){
   const n = new Date();
   const h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
@@ -647,9 +649,14 @@ function tickClock(){
   $("hMin").setAttribute("transform", `rotate(${m*6 + s*0.1} 100 100)`);
   $("hHour").setAttribute("transform", `rotate(${(h%12)*30 + m*0.5} 100 100)`);
 
-  $("cDate").innerHTML = `${n.getFullYear()}年<b>${n.getMonth()+1}月${n.getDate()}日</b>`;
-  $("cSub").textContent = `${WEEK_CN[n.getDay()]} · 第 ${weekOf(n)} 周`;
-  $("cTime").innerHTML = `${pad(h)}:${pad(m)}<small id="cSec">${pad(s)}</small>`;
+  $("cHM").textContent = `${pad(h)}:${pad(m)}`;
+  $("cSec").textContent = pad(s);
+  if (n.getDate() !== __lastDay){
+    __lastDay = n.getDate();
+    $("cYear").textContent = `${n.getFullYear()}年`;
+    $("cMD").textContent = `${n.getMonth()+1}月${n.getDate()}日`;
+    $("cSub").textContent = `${WEEK_CN[n.getDay()]} · 第 ${weekOf(n)} 周`;
+  }
 
   const mins = nowMin();
   const pct = Math.min(100, mins/1440*100);
@@ -667,17 +674,6 @@ function courseHTML(c, live, idx){
     <span class="sc-name">${c.n}${c.t && c.t !== "讲课" ? `<span class="tag">${c.t}</span>` : ""}</span>
     <span class="sc-where"><b>${c.p}</b><em class="sc-time">${st.a}–${et.b}</em></span>
   </div>`;
-}
-function nextClass(){
-  const now = new Date(), mins = nowMin();
-  for (let off = 0; off < 21; off++){
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate()+off);
-    for (const c of coursesOn(d, weekOf(d))){
-      if (off === 0 && periodTime(c.s).end <= mins) continue;
-      return {date:d, c, off};
-    }
-  }
-  return null;
 }
 function renderSchedule(){
   const now = new Date(), w = weekOf(now), mins = nowMin();
@@ -738,7 +734,10 @@ const WX_SVG = {
 };
 let __wx = null;
 
+let __wInflight = false, __wLast = 0;
 async function loadWeather(){
+  if (__wInflight || Date.now() - __wLast < 60000) return;
+  __wInflight = true;
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${CFG.lat}&longitude=${CFG.lng}`
     + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m`
     + `&hourly=temperature_2m,precipitation_probability,weather_code`
@@ -746,14 +745,17 @@ async function loadWeather(){
     + `&timezone=Asia%2FShanghai&forecast_days=2`;
   let d;
   try{
-    const r = await fetch(url, {cache:"no-store"});
+    const r = await fetch(url, {cache:"no-store", signal: AbortSignal.timeout(10000)});
+    if (!r.ok) throw new Error("http " + r.status);
     d = await r.json();
+    if (!d.current || !d.hourly || !d.hourly.time) throw new Error("bad payload");
     store.set("weather", {t:Date.now(), data:d});
+    __wLast = Date.now();
   }catch(e){
     const c = store.get("weather", null);
     if (!c) return;
     d = c.data;
-  }
+  }finally{ __wInflight = false; }
   __wx = d;
   paintWeather(d);
 }
@@ -770,6 +772,8 @@ function paintWeather(d){
   $("wWind").textContent = Math.round(cur.wind_speed_10m) + " km/h";
 
   const h = d.hourly;
+  if (!h.precipitation_probability) h.precipitation_probability = [];
+  if (!h.weather_code) h.weather_code = [];
   const nowH = new Date();
   const key = `${nowH.getFullYear()}-${pad(nowH.getMonth()+1)}-${pad(nowH.getDate())}T${pad(nowH.getHours())}:00`;
   let st = h.time.findIndex(x => x >= key);
@@ -862,7 +866,7 @@ function drawWeather(h, idx){
 }
 
 /* ============ MCSR ============ */
-function statLine(s, side){
+function statLine(s){
   if (!s) return "—";
   const g = (o,k) => (o && o[k]) || 0;
   const w = g(s.wins,"ranked"), l = g(s.loses,"ranked");
@@ -901,21 +905,27 @@ function countUp(el, to, dur = 1100, suffix = ""){
 let __eloCache = null;
 let __eloAnimated = false;
 let __eloNow = 0;
+let __mInflight = false, __mLast = 0;
 async function loadMCSR(){
+  if (__mInflight || Date.now() - __mLast < 60000) return;
+  __mInflight = true;
   let user, matches;
   try{
     const [r1, r2] = await Promise.all([
-      fetch(`https://api.mcsrranked.com/users/${CFG.user}`, {cache:"no-store"}),
-      fetch(`https://api.mcsrranked.com/users/${CFG.user}/matches?count=30`, {cache:"no-store"})
+      fetch(`https://api.mcsrranked.com/users/${CFG.user}`, {cache:"no-store", signal: AbortSignal.timeout(10000)}),
+      fetch(`https://api.mcsrranked.com/users/${CFG.user}/matches?count=30`, {cache:"no-store", signal: AbortSignal.timeout(10000)})
     ]);
+    if (!r1.ok || !r2.ok) throw new Error("http");
     user = (await r1.json()).data;
     matches = (await r2.json()).data;
+    if (!user || !Array.isArray(matches)) throw new Error("bad payload");
     store.set("mcsr", {t:Date.now(), user, matches});
+    __mLast = Date.now();
   }catch(e){
     const c = store.get("mcsr", null);
-    if (!c) return;
+    if (!c || !c.user) return;
     user = c.user; matches = c.matches;
-  }
+  }finally{ __mInflight = false; }
   paintMCSR(user, matches);
 }
 function paintMCSR(u, ms){
@@ -924,7 +934,8 @@ function paintMCSR(u, ms){
   const tier = applyTier(elo);
   $("mcRank").textContent = "#" + (u.eloRank || "—");
   $("mcName").textContent = u.nickname || CFG.user;
-  countUp($("mcElo"), elo, 1200);
+  if (!window.__eloCounted){ window.__eloCounted = true; countUp($("mcElo"), elo, 1200); }
+  else $("mcElo").textContent = elo ?? "—";
   const pk = Number((u.seasonResult || {}).highest) || 0;
   const FLAME = `<path d="M12.6 2.2c.3 2.4-.7 3.6-1.9 4.9-1.2 1.3-2.4 2.5-2.4 4.3a4.3 4.3 0 0 0 8.6 0c0-1.5-.6-2.8-1.5-4-.3 1.2-.9 1.7-1.5 1.4-.7-.4-.4-1.5-.2-2.5.3-1.6-.2-3-1.1-4.1z"/>`;
   const atPeak = pk && Number(elo) >= pk;
@@ -936,8 +947,8 @@ function paintMCSR(u, ms){
   }
 
   const st = u.statistics || {};
-  $("mcSeasonVals").innerHTML = statLine(st.season, "L");
-  $("mcTotalVals").innerHTML = statLine(st.total, "R");
+  $("mcSeasonVals").innerHTML = statLine(st.season);
+  $("mcTotalVals").innerHTML = statLine(st.total);
 
   __eloCache = [ms, elo, tier.color];
   __eloNow = elo;
@@ -956,7 +967,7 @@ function drawElo(matches, curElo, color){
   }
   pts.sort((a,b) => a.t - b.t);
   if (pts.length < 2) return;
-  pts.push({t: Date.now()/1000, v: curElo});
+  if (curElo != null) pts.push({t: Date.now()/1000, v: curElo});
 
   const wrap = document.querySelector(".ch-wrap");
   const rc = wrap.getBoundingClientRect();
@@ -1237,7 +1248,7 @@ function renderMatches(ms, season){
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
     return `<div class="mt-row" style="animation-delay:${i*38}ms">
-      <span class="mt-opp">${x.opp}</span>
+      <span class="mt-opp">${esc(x.opp)}</span>
       <span class="mt-res ${x.outcome}">${x.outcome}</span>
       ${x.ff ? `<span class="mt-time ff">FORFEIT</span>` : `<span class="${tc}">${ms2mmss(x.time)}</span>`}
       ${x.ovw >= 0 ? `<span class="ic i${x.ovw}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
@@ -1312,7 +1323,7 @@ function swapPanes(){
 
 /* ============ 启动 ============ */
 tickClock(); setInterval(tickClock, 1000);
-renderSchedule(); setInterval(renderSchedule, 1800000);
+renderSchedule(); setInterval(renderSchedule, 60000);
 loadWeather(); setInterval(loadWeather, 1800000);
 loadMCSR(); setInterval(loadMCSR, 300000);
 armSwap();
