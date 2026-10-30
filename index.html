@@ -69,6 +69,7 @@ body::before{
 }
 .cx-pane.on{transform:none;opacity:1;pointer-events:auto}
 .cx-pane.up{transform:translateY(-100%);opacity:0;pointer-events:none}
+.cx-pane.down{transform:translateY(100%);opacity:0;pointer-events:none}
 .cx-clock{flex-direction:row;align-items:center;gap:22px;padding:20px 24px}
 .dial{width:clamp(96px,18vh,136px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
@@ -233,6 +234,27 @@ body::before{
   font-size:12px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
   border-radius:12px;letter-spacing:.03em;
 }
+/* 课表加密锁 */
+.sc-lock{
+  position:absolute;inset:0;z-index:5;border-radius:inherit;padding:12px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(9,12,18,.9);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transition:opacity .45s ease;
+}
+.sc-lock.hide{opacity:0;pointer-events:none}
+.sc-lock-box{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}
+.sc-lock-ic{width:19px;height:19px;color:#5f6a7c}
+.sc-lock-in{
+  width:100%;max-width:200px;height:35px;border-radius:10px;text-align:center;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:#e6ecf6;font-size:13px;outline:none;font-family:inherit;
+  transition:border-color .25s ease,background .25s ease;
+}
+.sc-lock-in:focus{border-color:rgba(92,200,255,.5);background:rgba(92,200,255,.07)}
+.sc-lock-in::placeholder{color:#5f6a7c;font-size:11.5px}
+.sc-lock-msg{font-size:11px;color:#6b7484;height:14px;line-height:14px}
+.sc-lock-msg.err{color:#ff8080}
 
 /* ============ MCSR ============ */
 .mcsr{flex-direction:column;align-items:stretch;gap:0;padding:15px 24px 17px}
@@ -464,7 +486,7 @@ body::before{
     <div class="w-head">
       <div class="w-temp" id="wTemp">--°</div>
       <div class="w-meta">
-        <div class="w-city" title="武汉市洪山区狮子山街1号">华农 <span style="color:var(--dim-2);font-size:11px;letter-spacing:.12em">HONGSHAN</span></div>
+        <div class="w-city" title="武汉市洪山区">洪山区 <span style="color:var(--dim-2);font-size:11px;letter-spacing:.12em">HONGSHAN</span></div>
         <div class="w-desc" id="wDesc">读取中</div>
       </div>
       <div class="w-big" id="wBig"></div>
@@ -503,6 +525,13 @@ body::before{
       <div class="sc-sep"></div>
       <div class="sc-head"><span class="sc-title" id="tmrTitle">明天</span><span class="sc-sub" id="tmrSub">—</span></div>
       <div class="sc-list" id="tmrList"></div>
+    </div>
+    <div class="sc-lock" id="scLock">
+      <div class="sc-lock-box">
+        <svg class="sc-lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+        <input id="ttPass" class="sc-lock-in" type="password" placeholder="课表已加密，输入口令" autocomplete="current-password" enterkeyhint="go">
+        <div class="sc-lock-msg" id="ttMsg"></div>
+      </div>
     </div>
   </section>
 
@@ -650,32 +679,8 @@ function ago(ts){
 }
 
 /* ============ 课表 ============ */
-const TIMETABLE = [
- {n:"计算机网络B",t:"讲课",d:1,s:1,e:2,w:[2,3,4,5,8,9,13,15,16],p:"三教C403",tc:"张浩"},
- {n:"资源调查与评价B",t:"其他",d:1,s:3,e:4,w:[9,14],p:"四教B309",tc:"张海涛"},
- {n:"资源调查与评价B",t:"讲课",d:1,s:5,e:6,w:[3,4,5,7,8,13],p:"四教C406",tc:"张海涛"},
- {n:"软件工程B",t:"讲课",d:1,s:7,e:8,w:[2,3,4,5,7,8],p:"四教B303",tc:"王颖"},
- {n:"高光谱遥感",t:"讲课",d:2,s:1,e:2,w:[2,3,4,5,7,8,9],p:"四教C410",tc:"郭龙"},
- {n:"Python程序设计基础",t:"讲课",d:2,s:3,e:4,w:[12,13,14,15,16,17,18],p:"四教C410",tc:"汪善勤"},
- {n:"GIS专业英语",t:"讲课",d:2,s:3,e:4,w:[2,3,4,5,7,8],p:"四教B301",tc:"张文婷"},
- {n:"地图学",t:"讲课",d:2,s:5,e:6,w:[9,10,11,12,14,15,16,17,18],p:"四教B301",tc:"苗洁"},
- {n:"计算机网络B",t:"实验",d:2,s:5,e:8,w:[9,12,13,16,17],p:"逸夫楼C303",tc:"张浩"},
- {n:"资源调查与评价B",t:"讲课",d:3,s:3,e:4,w:[3,4,5,7,8,9,13,14],p:"四教C406",tc:"张海涛"},
- {n:"软件工程B",t:"讲课",d:3,s:5,e:6,w:[2,3,4,5,7,8],p:"四教B303",tc:"王颖"},
- {n:"民传体育健身C",t:"讲课",d:3,s:7,e:8,w:[2,3,4,5,7,8,9,10,11,13,14,15,16,17,18],p:"西体育馆（老馆）",tc:"邱玲"},
- {n:"计算机网络B",t:"讲课",d:3,s:9,e:10,w:[2,3,4,5,7,8,9,13,14,15,16],p:"三教C403",tc:"张浩"},
- {n:"Python程序设计基础",t:"讲课",d:4,s:3,e:4,w:[13,14,15,16,17],p:"四教C410",tc:"汪善勤"},
- {n:"高光谱遥感",t:"讲课",d:4,s:3,e:4,w:[2,3,4,6,7,8,9],p:"四教C410",tc:"郭龙"},
- {n:"地图学实验",t:"实验",d:4,s:5,e:8,w:[10,11],p:"四教B303",tc:"苗洁"},
- {n:"地图学实验",t:"实验",d:4,s:5,e:8,w:[15,16,17,18],p:"主楼209",tc:"苗洁"},
- {n:"地图学实验",t:"实验",d:4,s:5,e:8,w:[14],p:"校内户外",tc:"苗洁"},
- {n:"地图学",t:"讲课",d:5,s:1,e:2,w:[9,10,11,14,15,16,17],p:"四教B301",tc:"苗洁"},
- {n:"GIS专业英语",t:"讲课",d:5,s:3,e:4,w:[2,3],p:"四教B301",tc:"张文婷"},
- {n:"高光谱遥感",t:"讲课",d:5,s:3,e:4,w:[6,7],p:"四教C410",tc:"郭龙"},
- {n:"Python程序设计基础",t:"实验",d:5,s:5,e:8,w:[14,15,16,17,19],p:"主楼210",tc:"刘诗诗"},
- {n:"软件工程B",t:"实验",d:5,s:5,e:8,w:[3,6,7,9],p:"逸夫楼C203",tc:"王颖"},
- {n:"农林无人机遥感应用",t:"实验",d:6,s:1,e:8,w:[12,13,14,15],p:"主楼210",tc:"张建"}
-];
+let TIMETABLE = [];
+const TT_ENC = "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";
 const WEEK_CN = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
 const WEEK_SHORT = ["周日","周一","周二","周三","周四","周五","周六"];
 
@@ -884,13 +889,31 @@ async function loadPlug(){
 }
 
 const CX = { idx: 0 };
-function cxGo(i){
+function cxGo(i, dir){
+  // dir = 1：手指上滑，当前页往上走、新页从下面来
+  // dir = -1：手指下滑，当前页往下走、新页从上面来
+  if (dir === undefined) dir = 1;
   CX.idx = i;
   const a = $("cxClockPane"), b = $("cxPlugPane");
   if (!a || !b) return;
-  a.classList.toggle("on", i === 0);
-  a.classList.toggle("up", i > 0);
-  b.classList.toggle("on", i === 1);
+  const list = [a, b];
+  const next = list[i], cur = list[1 - i];
+
+  // 先把目标无过渡地摆到进入侧，避免从对侧横穿整个卡片
+  next.classList.remove("on");
+  next.style.transition = "none";
+  next.classList.remove("up", "down");
+  next.classList.add(dir > 0 ? "down" : "up");
+  void next.offsetWidth;
+  next.style.transition = "";
+
+  requestAnimationFrame(() => {
+    cur.classList.remove("on");
+    cur.classList.add(dir > 0 ? "up" : "down");
+    next.classList.remove("up", "down");
+    next.classList.add("on");
+  });
+
   if (i === 1) loadPlug();
 }
 (function cxSwipe(){
@@ -906,9 +929,9 @@ function cxGo(i){
     down = false;
     if (performance.now() - t0 > 1000) return;
     const dx = e.clientX - x0, dy = e.clientY - y0;
-    // 上下任一方向都切页；横向滑动留给充电桩列表自己滚
+    // 上下滑切页，横向留给充电桩列表自己滚
     if (Math.abs(dy) < 45 || Math.abs(dy) < Math.abs(dx) * 1.2) return;
-    cxGo(CX.idx === 0 ? 1 : 0);
+    cxGo(CX.idx === 0 ? 1 : 0, dy < 0 ? 1 : -1);
   });
   el.addEventListener("pointercancel", () => { down = false; });
 })();
@@ -923,6 +946,7 @@ function courseHTML(c, live, idx){
   </div>`;
 }
 function renderSchedule(){
+  if (!TIMETABLE || !TIMETABLE.length) return;
   const now = new Date(), w = weekOf(now), mins = nowMin();
   const today = coursesOn(now, w);
   const remain = today.filter(c => periodTime(c.e).end > mins);
@@ -944,6 +968,66 @@ function renderSchedule(){
   $("schedCard").classList.toggle("dense", remain.length + list.length > 5);
 
 }
+
+/* ============ 课表解锁（AES-GCM） ============ */
+const TT_LSK = "tt.pass";
+async function ttDecrypt(pass){
+  const bin = atob(TT_ENC);
+  const buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: buf.subarray(0, 16), iterations: 120000, hash: "SHA-256" },
+    km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+  );
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.subarray(16, 28) }, key, buf.subarray(28));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function ttTry(pass, silent){
+  const msg = $("ttMsg");
+  try{
+    TIMETABLE = await ttDecrypt(pass);
+    localStorage.setItem(TT_LSK, pass);
+    $("scLock").classList.add("hide");
+    if (msg){ msg.textContent = ""; msg.classList.remove("err"); }
+    renderSchedule();
+    return true;
+  }catch(e){
+    if (!silent && msg){
+      msg.textContent = "口令不对";
+      msg.classList.add("err");
+      $("ttPass").value = "";
+      $("ttPass").focus();
+    }
+    return false;
+  }
+}
+(function ttBoot(){
+  const inp = $("ttPass");
+  if (!inp) return;
+  if (typeof TT_ENC === "undefined"){
+    $("scLock").classList.add("hide");
+    return;
+  }
+  const saved = localStorage.getItem(TT_LSK);
+  if (saved){
+    ttTry(saved, true).then(ok => {
+      if (!ok){ localStorage.removeItem(TT_LSK); setTimeout(() => inp.focus(), 500); }
+    });
+  } else {
+    setTimeout(() => inp.focus(), 700);
+  }
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter"){
+      const v = inp.value.trim();
+      if (v) ttTry(v, false);
+    }
+  });
+  inp.addEventListener("input", () => {
+    const m = $("ttMsg");
+    if (m){ m.textContent = ""; m.classList.remove("err"); }
+  });
+})();
 
 /* ============ 天气 ============ */
 const WMO = {
@@ -1554,7 +1638,9 @@ function armSwap(){
   clearTimeout(swapTimer);
   swapTimer = setTimeout(swapPanes, CFG.swapMs);
 }
-function swapPanes(){
+function swapPanes(dir){
+  // dir = 1：手指上滑，新页从下面来；dir = -1：手指下滑，新页从上面来
+  if (dir === undefined) dir = 1;
   const t = performance.now();
   if (t - swapLock < 900){ armSwap(); return; }   // 动画没走完不接受新的切换
   swapLock = t;
@@ -1564,15 +1650,17 @@ function swapPanes(){
   const next = panes[1-swapIdx];
   swapIdx = 1 - swapIdx;
 
-  // 待机面板一律复位到上方，避免上一次动画的残留位置让入场方向忽上忽下
+  const enterFrom = dir > 0 ? 107 : -106;   // 新页从哪一侧进入
+  const exitTo    = dir > 0 ? -106 : 107;   // 旧页往哪一侧离开
+
   next.style.transition = "none";
-  next.style.transform = "translateY(-106%)";
+  next.style.transform = `translateY(${enterFrom}%)`;
   next.style.opacity = "0";
   next.style.pointerEvents = "none";
   void next.offsetWidth;
   next.style.transition = "";
 
-  cur.style.transform = "translateY(107%)";
+  cur.style.transform = `translateY(${exitTo}%)`;
   cur.style.opacity = "0";
   cur.style.pointerEvents = "none";
 
@@ -1600,8 +1688,8 @@ function swapPanes(){
     if (performance.now() - t0 > 900) return;
     const dx = e.clientX - x0, dy = e.clientY - y0;
     const ax = Math.abs(dx), ay = Math.abs(dy);
-    if (ay > ax && ay > 42) swapPanes();
-    else if (ax > ay && ax > 56) swapPanes();
+    if (ay > ax && ay > 42) swapPanes(dy < 0 ? 1 : -1);
+    else if (ax > ay && ax > 56) swapPanes(dx < 0 ? 1 : -1);
   });
   el.addEventListener("pointercancel", () => { down = false; });
 })();
