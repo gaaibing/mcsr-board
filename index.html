@@ -218,12 +218,15 @@ body::before{
 .mc-col+.mc-col{padding-right:0;padding-left:13px;border-left:1px solid var(--line-soft)}
 .mc-tag{font-size:11px;letter-spacing:.15em;font-weight:800;color:var(--dim);text-transform:uppercase}
 .mc-vals{
-  font-size:clamp(12.5px,1.75vh,15px);color:#b6c0d3;
-  display:grid;grid-template-columns:1fr 1fr;column-gap:7px;row-gap:1px;min-width:0;
+  font-size:clamp(12px,1.7vh,14px);color:#b6c0d3;
+  display:grid;grid-template-columns:1fr 1fr;column-gap:9px;row-gap:1px;min-width:0;
 }
-.mc-vals span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mc-vals span:nth-child(even){text-align:right}
+.mc-vals .v{
+  display:flex;align-items:baseline;justify-content:space-between;gap:5px;
+  white-space:nowrap;overflow:hidden;
+}
 .mc-vals b{color:#fff;font-weight:700}
+.mc-vals i{font-style:normal;color:var(--dim-2);font-size:.92em}
 
 /* ============ 轮播 ============ */
 .swap{position:relative;touch-action:none}
@@ -268,7 +271,8 @@ body::before{
 .lt-opp{font-size:12.5px;color:var(--dim-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lt-opp i{font-style:normal;color:var(--dim-2);opacity:.7}
 .lt-opp b{color:#e4eaf3;font-weight:700}
-.lt-map{font-size:12px;color:#8a95a7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt-maps{display:flex;align-items:center;gap:7px;margin-top:3px}
+.lt-ic{width:20px;height:20px;border-radius:5px;display:block;flex:0 0 auto}
 .lt-side{
   flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px;
   padding-left:11px;border-left:1px solid rgba(255,255,255,.09);min-width:88px;
@@ -482,8 +486,10 @@ body::before{
               <span class="lt-ago" id="ltAgo">—</span>
             </div>
             <div class="lt-opp"><i>vs.</i> <b id="ltOpp">—</b></div>
-            <div class="lt-map" id="ltOvw">—</div>
-            <div class="lt-map" id="ltNth">—</div>
+            <div class="lt-maps">
+              <i class="ic lt-ic" id="ltOvw"></i>
+              <i class="ic lt-ic" id="ltNth"></i>
+            </div>
           </div>
           <div class="lt-side">
             <span class="lt-tier" id="ltTier">—</span>
@@ -849,7 +855,7 @@ function drawWeather(h, idx){
 }
 
 /* ============ MCSR ============ */
-function statLine(s){
+function statLine(s, side){
   if (!s) return "—";
   const g = (o,k) => (o && o[k]) || 0;
   const w = g(s.wins,"ranked"), l = g(s.loses,"ranked");
@@ -859,9 +865,13 @@ function statLine(s){
   const wr = (w+l) > 0 ? Math.round(w/(w+l)*100) : 0;
   const avg = comp > 0 ? Math.round(compTime/comp) : 0;
   const fr = played > 0 ? Math.round(ff/played*100) : 0;
-  return `<span><b>${wr}%</b> wr</span><span><b>${fr}%</b> ffr</span>`
-       + `<span><b>${ms2mmss(pb)}</b> pb</span><span><b>${streak}</b> bws</span>`
-       + `<span><b>${ms2mmss(avg)}</b> avg</span><span></span>`;
+  // 左侧块：数字在左、标签在右；右侧块镜像过来，保证两侧数字都靠外
+  const cell = (num, label) => side === "R"
+    ? `<span class="v"><i>${label}</i><b>${num}</b></span>`
+    : `<span class="v"><b>${num}</b><i>${label}</i></span>`;
+  return cell(`${wr}%`, "wr") + cell(`${fr}%`, "ffr")
+       + cell(ms2mmss(pb), "pb") + cell(`${streak}`, "bws")
+       + cell(ms2mmss(avg), "avg") + `<span class="v"></span>`;
 }
 function applyTier(elo){
   const {tier, label} = tierOf(elo);
@@ -919,8 +929,8 @@ function paintMCSR(u, ms){
   }
 
   const st = u.statistics || {};
-  $("mcSeasonVals").innerHTML = statLine(st.season);
-  $("mcTotalVals").innerHTML = statLine(st.total);
+  $("mcSeasonVals").innerHTML = statLine(st.season, "L");
+  $("mcTotalVals").innerHTML = statLine(st.total, "R");
 
   __eloCache = [ms, elo, tier.color];
   __eloNow = elo;
@@ -1159,8 +1169,14 @@ function renderLatest(ms){
   $("ltOpp").textContent = opp.nickname || "—";
 
   const seed = m.seed || {};
-  $("ltOvw").textContent = "Overworld " + prettyName(seed.overworld);
-  $("ltNth").textContent = "Bastion " + prettyName(seed.nether);
+  const setMap = (el, k, map) => {
+    const idx = (k in map) ? map[k] : -1;
+    el.className = "ic lt-ic" + (idx >= 0 ? " i" + idx : "");
+    if (idx < 0){ el.style.backgroundImage = "none"; el.style.background = "rgba(255,255,255,.05)"; }
+    else { el.style.backgroundImage = ""; el.style.background = ""; }
+  };
+  setMap($("ltOvw"), seed.overworld, OVW_IDX);
+  setMap($("ltNth"), seed.nether, NTH_IDX);
 
   const ch = (m.changes || []).find(c => c.uuid === me) || {};
   const before = typeof ch.eloRate === "number" ? ch.eloRate : null;
