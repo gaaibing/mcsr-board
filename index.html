@@ -58,8 +58,24 @@ body::before{
 .swap{grid-area:8/9/21/25;animation-delay:.28s;padding:0;overflow:hidden}
 
 /* ============ 时钟 ============ */
-/* 时钟：513px 宽，圆盘在左、日期时间在右 */
-.clock{flex-direction:row;align-items:center;gap:22px;padding:20px 24px}
+/* 时钟：513px 宽，圆盘在左、日期时间在右。与充电桩左右堆叠 */
+.clock{padding:0;overflow:hidden}
+.cx-stack{position:absolute;inset:0;overflow:hidden}
+.cx-pane{
+  position:absolute;inset:0;display:flex;
+  transform:translateX(100%);opacity:0;pointer-events:none;
+  transition:transform .52s cubic-bezier(.22,.92,.26,1),opacity .4s ease;
+  will-change:transform;
+}
+.cx-pane.on{transform:none;opacity:1;pointer-events:auto}
+.cx-pane.left{transform:translateX(-100%);opacity:0;pointer-events:none}
+.cx-clock{flex-direction:row;align-items:center;gap:22px;padding:20px 24px}
+.cx-dots{
+  position:absolute;left:0;right:0;bottom:8px;z-index:5;
+  display:flex;justify-content:center;gap:6px;pointer-events:none;
+}
+.cx-dot{width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.18);transition:width .4s,background .4s}
+.cx-dot.on{width:15px;background:rgba(255,255,255,.55)}
 .dial{width:clamp(96px,18vh,136px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
 .clock-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;margin-top:0}
@@ -110,6 +126,38 @@ body::before{
 .ws-ic{width:16px;height:16px;flex:0 0 auto}
 .ws-ic.rise{color:#ffc46b}
 .ws-ic.set{color:#ff8f61}
+
+/* ============ 充电桩 ============ */
+.pg{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;padding:16px 20px 20px}
+.pg-head{display:flex;align-items:baseline;gap:10px}
+.pg-title{font-size:15px;font-weight:800;color:#e6ecf6;letter-spacing:.02em;white-space:nowrap}
+.pg-free{font-size:12.5px;font-weight:800;color:#3fd07a;white-space:nowrap}
+.pg-free.none{color:#7c8698}
+.pg-sub{margin-left:auto;font-size:11px;color:var(--dim-2);white-space:nowrap}
+.pg-devs{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.pg-dev{display:flex;flex-direction:column;gap:5px;min-width:0}
+.pg-dev-head{display:flex;align-items:baseline;gap:8px}
+.pg-dev-name{font-size:11.5px;font-weight:800;color:#aab6c8;letter-spacing:.07em}
+.pg-dev-free{font-size:11px;font-weight:700;color:#3fd07a}
+.pg-dev-free.none{color:#66707f}
+.pg-dev-tip{margin-left:auto;font-size:10.5px;color:var(--dim-2);font-variant-numeric:tabular-nums}
+.pg-slots{display:flex;gap:4px}
+.pg-slot{
+  flex:1 1 0;min-width:0;height:60px;border-radius:9px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.05);
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
+}
+.pg-n{font-size:10px;font-weight:700;color:#5d6878;line-height:1}
+.pg-t{font-size:11.5px;font-weight:600;color:#9aa5b6;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pg-slot.free{background:rgba(63,208,122,.15);border-color:rgba(63,208,122,.5);box-shadow:0 0 20px -8px rgba(63,208,122,.9)}
+.pg-slot.free .pg-n{color:#8fe9b4}
+.pg-slot.free .pg-t{color:#3fd07a;font-weight:800}
+.pg-slot.soon{background:rgba(255,171,94,.10);border-color:rgba(255,171,94,.42)}
+.pg-slot.soon .pg-t{color:#ffab5e}
+.pg-slot.over{background:rgba(255,107,107,.11);border-color:rgba(255,107,107,.46)}
+.pg-slot.over .pg-t{color:#ff8080}
+.pg-slot.smart .pg-n{color:#4f5866}
 
 /* ============ 课表 ============ */
 .schedule{padding:13px 15px 12px;justify-content:flex-start}
@@ -359,7 +407,9 @@ body::before{
 <body>
 <div class="board">
 
-  <section class="tile clock">
+  <section class="tile clock" id="clockCard">
+   <div class="cx-stack" id="cxStack">
+    <div class="cx-pane cx-clock on" id="cxClockPane">
     <div class="dial">
       <svg viewBox="0 0 200 200">
         <defs>
@@ -384,6 +434,19 @@ body::before{
       <div class="daybar"><span id="daybar"></span></div>
       <div class="daybar-meta"><span id="dayLeft">—</span><span id="dayPct">—</span></div>
     </div>
+    </div>
+    <div class="cx-pane" id="cxPlugPane">
+      <div class="pg">
+        <div class="pg-head">
+          <span class="pg-title">荟9 充电桩</span>
+          <span class="pg-free" id="pgFree">—</span>
+          <span class="pg-sub" id="pgSub">未连接</span>
+        </div>
+        <div class="pg-devs" id="pgDevs"></div>
+      </div>
+    </div>
+   </div>
+   <div class="cx-dots"><i class="cx-dot on" id="cxDot0"></i><i class="cx-dot" id="cxDot1"></i></div>
   </section>
 
   <section class="tile weather">
@@ -523,6 +586,7 @@ const CFG = {
   user: "gaaib1ng",
   uuid: "256849af5b0840edaf76b3d66da3d69a",
   lat: 30.4770, lng: 114.3520,
+  plugUrl: "https://hgplug.pages.dev/",   // Cloudflare Pages 中转，只返回荟9东1、东2
   semesterStart: "2026-08-31",
   swapMs: 15000,
   periods: [
@@ -664,7 +728,148 @@ function tickClock(){
   const left = 1440 - mins;
   $("dayLeft").textContent = `今天还剩 ${Math.floor(left/60)} 小时 ${Math.floor(left%60)} 分`;
   $("dayPct").textContent = `${pct.toFixed(1)}% 已过`;
+
+  tickPlug();
 }
+
+/* ============ 充电桩（与时钟左右堆叠） ============ */
+let __plug = null;
+
+function fmtCd(sec){
+  sec = Math.max(0, Math.floor(sec));
+  if (sec < 60) return sec + "s";
+  if (sec < 3600) return Math.floor(sec/60) + ":" + pad(sec%60);
+  return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60));
+}
+
+function fmtUsed(sec){
+  sec = Math.max(0, Math.floor(sec));
+  if (sec < 60) return sec + "s";
+  if (sec < 3600) return Math.floor(sec/60) + "m";
+  return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60));
+}
+
+function plugShell(){
+  const box = $("pgDevs");
+  if (!box) return;
+  const ds = (__plug && __plug.devices) || [];
+  box.innerHTML = ds.map(d => `
+    <div class="pg-dev">
+      <div class="pg-dev-head">
+        <span class="pg-dev-name">${d.name.replace(/^荟园\d+栋/, "")}</span>
+        <span class="pg-dev-free">—</span>
+      </div>
+      <div class="pg-slots">${d.ports.map(p => `<div class="pg-slot"><span class="pg-n">${p.n}</span><span class="pg-t">--</span></div>`).join("")}</div>
+    </div>`).join("");
+}
+
+function tickPlug(){
+  if (!__plug || !__plug.devices || !__plug.devices.length) return;
+  const box = $("pgDevs");
+  if (!box) return;
+  const now = Date.now() / 1000;
+  let fAll = 0, cAll = 0;
+  const devEls = box.children;
+
+  __plug.devices.forEach((d, di) => {
+    const devEl = devEls[di];
+    if (!devEl) return;
+    let f = 0;
+    const slEls = devEl.querySelectorAll(".pg-slot");
+    d.ports.forEach((p, pi) => {
+      const el = slEls[pi];
+      if (!el) return;
+      const t = el.querySelector(".pg-t");
+      el.className = "pg-slot";
+      if (p.s === 1){
+        f++;
+        el.classList.add("free");
+        t.textContent = "空闲";
+      } else if (p.m || p.u || !p.d){
+        el.classList.add("smart");
+        t.textContent = "用 " + fmtUsed(now - p.t);
+      } else if (p.d <= now){
+        el.classList.add("over");
+        t.textContent = "到时";
+      } else {
+        const left = p.d - now;
+        if (left < 1800) el.classList.add("soon");
+        t.textContent = fmtCd(left);
+      }
+    });
+    const fe = devEl.querySelector(".pg-dev-free");
+    if (fe){
+      fe.textContent = f ? f + " 空" : "满";
+      fe.classList.toggle("none", f === 0);
+    }
+    fAll += f;
+    cAll += d.count || d.ports.length;
+  });
+
+  const pf = $("pgFree");
+  if (pf){
+    pf.textContent = `空闲 ${fAll}/${cAll}`;
+    pf.classList.toggle("none", fAll === 0);
+  }
+
+  const at = (__plug.devices[0] || {}).at;
+  if (at){
+    const age = Math.max(0, Math.round(now - at));
+    $("pgSub").textContent = age < 90 ? `${age}s 前采集` : `${Math.round(age/60)}min 前采集`;
+  }
+}
+
+async function loadPlug(){
+  if (!CFG.plugUrl) return;
+  try{
+    const r = await fetch(CFG.plugUrl, {cache:"no-store", signal:AbortSignal.timeout(8000)});
+    if (!r.ok) throw new Error("http " + r.status);
+    const d = await r.json();
+    if (!d || !Array.isArray(d.devices) || !d.devices.length) throw new Error("bad payload");
+    // 按名称固定顺序：东1 在上、东2 在下
+    d.devices.sort((a, b) => a.name.localeCompare(b.name, "zh"));
+    const rebuild = !__plug || __plug.devices.length !== d.devices.length
+      || __plug.devices.some((x, i) => x.name !== d.devices[i].name);
+    __plug = d;
+    if (rebuild) plugShell();
+    tickPlug();
+  }catch(e){
+    const s = $("pgSub");
+    if (s) s.textContent = "中转不可用";
+  }
+}
+
+const CX = { idx: 0 };
+function cxGo(i){
+  CX.idx = i;
+  const a = $("cxClockPane"), b = $("cxPlugPane");
+  if (!a || !b) return;
+  a.classList.toggle("on", i === 0);
+  a.classList.toggle("left", i > 0);
+  b.classList.toggle("on", i === 1);
+  $("cxDot0").classList.toggle("on", i === 0);
+  $("cxDot1").classList.toggle("on", i === 1);
+  if (i === 1) loadPlug();
+}
+(function cxSwipe(){
+  const el = $("cxStack");
+  if (!el) return;
+  let x0 = 0, y0 = 0, t0 = 0, down = false;
+  el.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    down = true; x0 = e.clientX; y0 = e.clientY; t0 = performance.now();
+  });
+  el.addEventListener("pointerup", e => {
+    if (!down) return;
+    down = false;
+    if (performance.now() - t0 > 1000) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0 && CX.idx === 0) cxGo(1);
+    else if (dx > 0 && CX.idx === 1) cxGo(0);
+  });
+  el.addEventListener("pointercancel", () => { down = false; });
+})();
 
 /* ============ 课表 ============ */
 function courseHTML(c, live, idx){
@@ -1326,6 +1531,7 @@ tickClock(); setInterval(tickClock, 1000);
 renderSchedule(); setInterval(renderSchedule, 60000);
 loadWeather(); setInterval(loadWeather, 1800000);
 loadMCSR(); setInterval(loadMCSR, 300000);
+loadPlug(); setInterval(loadPlug, 3000);
 armSwap();
 
 window.addEventListener("resize", () => {
@@ -1336,9 +1542,12 @@ window.addEventListener("resize", () => {
   }, 280);
 });
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden){ tickClock(); renderSchedule(); loadWeather(); loadMCSR(); }
+  if (!document.hidden){ tickClock(); renderSchedule(); loadWeather(); loadMCSR(); loadPlug(); }
 });
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+// 调试：#plug 直接看充电桩页
+if (location.hash === "#plug") cxGo(1);
 
 // 调试：#list 直接看列表页
 if (location.hash === "#list"){
