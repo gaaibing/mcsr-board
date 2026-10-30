@@ -164,13 +164,6 @@ body::before{
   font-size:12px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
   border-radius:12px;letter-spacing:.03em;
 }
-.sc-foot{
-  margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);
-  font-size:12px;color:var(--dim-2);
-  display:flex;justify-content:space-between;align-items:center;gap:10px;
-}
-.sc-foot b{color:#b3bccf;font-weight:600}
-.sc-foot .nx{color:var(--warm);font-weight:600}
 
 /* ============ MCSR ============ */
 .mcsr{flex-direction:row;align-items:center;gap:24px;padding:18px 26px}
@@ -200,15 +193,22 @@ body::before{
 .mc-elo b{color:#fff;font-weight:700;font-size:1.2em}
 .mc-peak{font-size:clamp(13px,1.8vh,17px);color:var(--dim-2)}
 .mc-peak b{color:var(--dim);font-weight:600}
-.mc-rows{display:flex;flex-direction:column;gap:11px}
-.mc-row{display:flex;align-items:baseline;gap:12px;min-width:0}
+.mc-flame{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 8px;border-radius:99px;
+  background:linear-gradient(100deg,#ff8a1e,#ff3d28);color:#fff;
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;line-height:1;
+  box-shadow:0 7px 20px -9px rgba(255,90,30,.95),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.mc-flame svg{width:12px;height:12px;fill:#fff;flex:0 0 auto}
+.mc-rows{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;align-items:start}
+.mc-col{display:flex;flex-direction:column;gap:5px;min-width:0}
 .mc-tag{
-  flex:0 0 auto;font-size:11.5px;letter-spacing:.12em;font-weight:700;color:var(--dim-2);
-  padding:3px 10px;border-radius:7px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.05);
+  align-self:flex-start;font-size:10.5px;letter-spacing:.14em;font-weight:700;color:var(--dim-2);
+  padding:2px 9px;border-radius:6px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.05);
 }
 .mc-vals{
-  font-size:clamp(13px,1.9vh,16.5px);color:#b6c0d3;
-  display:flex;flex-direction:column;gap:2px;min-width:0;
+  font-size:clamp(12.5px,1.75vh,15px);color:#b6c0d3;
+  display:flex;flex-direction:column;gap:1px;min-width:0;
 }
 .mc-vals span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-vals b{color:#fff;font-weight:700}
@@ -375,7 +375,6 @@ body::before{
       <div class="sc-head"><span class="sc-title" id="tmrTitle">明天</span><span class="sc-sub" id="tmrSub">—</span></div>
       <div class="sc-list" id="tmrList"></div>
     </div>
-    <div class="sc-foot" id="scFoot"></div>
   </section>
 
   <section class="tile mcsr">
@@ -392,11 +391,11 @@ body::before{
           <span id="mcTier">载入中</span>
         </span>
         <span class="mc-elo"><b id="mcElo">—</b> elo</span>
-        <span class="mc-peak"><b id="mcPeak">—</b> peak</span>
+        <span class="mc-peak" id="mcPeak">—</span>
       </div>
       <div class="mc-rows">
-        <div class="mc-row"><span class="mc-tag">赛季</span><span class="mc-vals" id="mcSeasonVals">—</span></div>
-        <div class="mc-row"><span class="mc-tag">总计</span><span class="mc-vals" id="mcTotalVals">—</span></div>
+        <div class="mc-col"><span class="mc-tag">赛季</span><span class="mc-vals" id="mcSeasonVals">—</span></div>
+        <div class="mc-col"><span class="mc-tag">总计</span><span class="mc-vals" id="mcTotalVals">—</span></div>
       </div>
     </div>
   </section>
@@ -493,7 +492,7 @@ function ago(ts){
   const s = Date.now()/1000 - ts;
   if (s < 60) return "now";
   if (s < 3600) return Math.floor(s/60) + "min";
-  if (s < 86400) return Math.floor(s/3600) + "hr";
+  if (s < 86400) return Math.floor(s/3600) + "h";
   if (s < 86400*7) return Math.floor(s/86400) + "d";
   if (s < 86400*30) return Math.floor(s/86400/7) + "w";
   if (s < 86400*365) return Math.floor(s/86400/30) + "m";
@@ -625,14 +624,6 @@ function renderSchedule(){
   // 条目多时收紧排版，保证不裁切
   $("schedCard").classList.toggle("dense", remain.length + list.length > 5);
 
-  const nx = nextClass();
-  if (nx){
-    const st = periodTime(nx.c.s);
-    const dayTxt = nx.off === 0 ? "今天" : nx.off === 1 ? "明天" : WEEK_SHORT[nx.date.getDay()];
-    $("scFoot").innerHTML = `<span>下次 · <b>${dayTxt}</b> ${st.a}</span><span class="nx">${nx.c.n}</span>`;
-  } else {
-    $("scFoot").innerHTML = `<span>未来三周没有课</span>`;
-  }
 }
 
 /* ============ 天气 ============ */
@@ -805,8 +796,9 @@ function statLine(s){
   const wr = (w+l) > 0 ? Math.round(w/(w+l)*100) : 0;
   const avg = comp > 0 ? Math.round(compTime/comp) : 0;
   const fr = played > 0 ? Math.round(ff/played*100) : 0;
-  return `<span><b>${wr}%</b> 胜率 <i>·</i> <b>${ms2mmss(pb)}</b> PB <i>·</i> <b>${streak}</b> 连胜</span>`
-       + `<span><b>${ms2mmss(avg)}</b> 场均 <i>·</i> <b>${fr}%</b> 投降</span>`;
+  return `<span><b>${wr}%</b> wr <i>·</i> <b>${ms2mmss(pb)}</b> pb</span>`
+       + `<span><b>${ms2mmss(avg)}</b> avg <i>·</i> <b>${fr}%</b> ffr</span>`
+       + `<span><b>${streak}</b> bwt</span>`;
 }
 function applyTier(elo){
   const {tier, label} = tierOf(elo);
@@ -852,7 +844,13 @@ function paintMCSR(u, ms){
   $("mcRank").textContent = "#" + (u.eloRank || "—");
   $("mcName").textContent = u.nickname || CFG.user;
   countUp($("mcElo"), elo, 1200);
-  $("mcPeak").textContent = (u.seasonResult || {}).highest || "—";
+  const pk = Number((u.seasonResult || {}).highest) || 0;
+  const FLAME = `<path d="M12.6 2.2c.3 2.4-.7 3.6-1.9 4.9-1.2 1.3-2.4 2.5-2.4 4.3a4.3 4.3 0 0 0 8.6 0c0-1.5-.6-2.8-1.5-4-.3 1.2-.9 1.7-1.5 1.4-.7-.4-.4-1.5-.2-2.5.3-1.6-.2-3-1.1-4.1z"/>`;
+  if (pk && Number(elo) >= pk){
+    $("mcPeak").innerHTML = `<span class="mc-flame"><svg viewBox="0 0 24 24">${FLAME}</svg>PEAK ELO</span>`;
+  } else {
+    $("mcPeak").innerHTML = `<b>${pk || "—"}</b> peak`;
+  }
 
   const st = u.statistics || {};
   $("mcSeasonVals").innerHTML = statLine(st.season);
@@ -892,7 +890,7 @@ function drawElo(matches, curElo, color){
     const span = Math.max(hi-lo, 20);
     if (up.min <= hi + span*1.1){ hi = Math.max(hi, up.min); tierVal = up.min; }
   }
-  const padV = Math.max(3, (hi-lo)*0.05);
+  const padV = Math.max(5, (hi-lo)*0.22);
   lo -= padV; hi += padV;
   if (hi - lo < 20){ const c = (hi+lo)/2; lo = c-10; hi = c+10; }
 
