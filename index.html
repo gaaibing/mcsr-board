@@ -965,32 +965,33 @@ function drawElo(matches, curElo, color){
     ln.setAttribute("opacity", ".85");
     tg.appendChild(ln);
 
+    // 不用底框（Safari 下 getComputedTextLength 与 letter-spacing 的实际渲染宽度
+    // 对不上，框会跑偏），改成给文字描一圈深色描边，压住折线也看得清
+    // 两层文字：底层深色描边打底，上层填色。不用 paint-order，
+    // 老 Safari 不支持时会变成整块深色，这样写两个 text 一定正确
     const label = t.min + " · " + t.name.toUpperCase();
+    const halo = document.createElementNS(NS, "text");
+    halo.setAttribute("x", W - XR - 6);
+    halo.setAttribute("y", y - 7);
+    halo.setAttribute("text-anchor", "end");
+    halo.setAttribute("font-size", "12");
+    halo.setAttribute("font-weight", "700");
+    halo.setAttribute("fill", "#0a0e15");
+    halo.setAttribute("stroke", "#0a0e15");
+    halo.setAttribute("stroke-width", "4");
+    halo.setAttribute("stroke-linejoin", "round");
+    halo.textContent = label;
+    tg.appendChild(halo);
+
     const tx = document.createElementNS(NS, "text");
-    tx.setAttribute("x", W - XR - 8);
+    tx.setAttribute("x", W - XR - 6);
     tx.setAttribute("y", y - 7);
     tx.setAttribute("text-anchor", "end");
     tx.setAttribute("font-size", "12");
     tx.setAttribute("font-weight", "700");
-    tx.setAttribute("letter-spacing", ".06em");
     tx.setAttribute("fill", t.color);
     tx.textContent = label;
     tg.appendChild(tx);
-
-    // 文字垫一层底色，避免和折线叠在一起看不清
-    const tw = (tx.getComputedTextLength && tx.getComputedTextLength()) || label.length * 7;
-    const bg = document.createElementNS(NS, "rect");
-    bg.setAttribute("x", W - XR - 8 - tw - 7);
-    bg.setAttribute("y", y - 18);
-    bg.setAttribute("width", tw + 14);
-    bg.setAttribute("height", 16);
-    bg.setAttribute("rx", 5);
-    bg.setAttribute("fill", "#0b0f16");
-    bg.setAttribute("opacity", ".92");
-    bg.setAttribute("stroke", t.color);
-    bg.setAttribute("stroke-opacity", ".35");
-    bg.setAttribute("stroke-width", "1");
-    tg.insertBefore(bg, tx);
   }
 
   // 按段位区域切分折线：每条边都在穿越阈值处打断，颜色取该段中点所在区域
