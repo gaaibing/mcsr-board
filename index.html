@@ -128,36 +128,50 @@ body::before{
 .ws-ic.set{color:#ff8f61}
 
 /* ============ 充电桩 ============ */
-.pg{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;padding:16px 20px 20px}
-.pg-head{display:flex;align-items:baseline;gap:10px}
+.pg{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;padding:14px 16px 15px}
+.pg-head{display:flex;align-items:baseline;gap:9px}
 .pg-title{font-size:15px;font-weight:800;color:#e6ecf6;letter-spacing:.02em;white-space:nowrap}
 .pg-free{font-size:12.5px;font-weight:800;color:#3fd07a;white-space:nowrap}
 .pg-free.none{color:#7c8698}
 .pg-sub{margin-left:auto;font-size:11px;color:var(--dim-2);white-space:nowrap}
-.pg-devs{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
-.pg-dev{display:flex;flex-direction:column;gap:5px;min-width:0}
-.pg-dev-head{display:flex;align-items:baseline;gap:8px}
-.pg-dev-name{font-size:11.5px;font-weight:800;color:#aab6c8;letter-spacing:.07em}
-.pg-dev-free{font-size:11px;font-weight:700;color:#3fd07a}
-.pg-dev-free.none{color:#66707f}
-.pg-dev-tip{margin-left:auto;font-size:10.5px;color:var(--dim-2);font-variant-numeric:tabular-nums}
-.pg-slots{display:flex;gap:4px}
-.pg-slot{
-  flex:1 1 0;min-width:0;height:60px;border-radius:9px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.05);
-  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
+.pg-devs{display:flex;gap:10px;min-height:0}
+.pg-dev{
+  flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:7px;
+  padding:8px 10px 10px;border-radius:14px;
+  background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.042);
 }
-.pg-n{font-size:10px;font-weight:700;color:#5d6878;line-height:1}
-.pg-t{font-size:11.5px;font-weight:600;color:#9aa5b6;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
-.pg-slot.free{background:rgba(63,208,122,.15);border-color:rgba(63,208,122,.5);box-shadow:0 0 20px -8px rgba(63,208,122,.9)}
-.pg-slot.free .pg-n{color:#8fe9b4}
-.pg-slot.free .pg-t{color:#3fd07a;font-weight:800}
-.pg-slot.soon{background:rgba(255,171,94,.10);border-color:rgba(255,171,94,.42)}
-.pg-slot.soon .pg-t{color:#ffab5e}
-.pg-slot.over{background:rgba(255,107,107,.11);border-color:rgba(255,107,107,.46)}
-.pg-slot.over .pg-t{color:#ff8080}
-.pg-slot.smart .pg-n{color:#4f5866}
+.pg-dev-head{display:flex;align-items:baseline;gap:7px}
+.pg-dev-name{font-size:13.5px;font-weight:800;color:#dfe6f0;letter-spacing:.02em;white-space:nowrap}
+.pg-dev-free{font-size:10.5px;font-weight:700;color:#5f6a7c;white-space:nowrap}
+.pg-dev-free.has{color:#3fd07a}
+.pg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.pg-cell{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.pg-box{
+  width:100%;height:57px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#8b96a8;
+  background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.055);
+  transition:background .35s ease,border-color .35s ease,color .35s ease,box-shadow .35s ease;
+}
+.pg-lab{font-size:8.5px;color:#7c8698;line-height:1;white-space:nowrap}
+.pg-val{font-size:11px;font-weight:700;color:#b9c3d2;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pg-cell.free .pg-box{
+  background:linear-gradient(160deg,rgba(63,208,122,.34),rgba(63,208,122,.13));
+  border-color:rgba(63,208,122,.62);color:#eafff3;
+  box-shadow:0 0 24px -8px rgba(63,208,122,.9);
+}
+.pg-cell.free .pg-lab{color:#5fd08c}
+.pg-cell.free .pg-val{color:#3fd07a}
+.pg-cell.soon .pg-box{
+  background:linear-gradient(160deg,rgba(255,171,94,.22),rgba(255,171,94,.07));
+  border-color:rgba(255,171,94,.46);color:#ffe0bb;
+}
+.pg-cell.soon .pg-val{color:#ffab5e}
+.pg-cell.over .pg-box{background:rgba(255,107,107,.13);border-color:rgba(255,107,107,.42);color:#ffc0c0}
+.pg-cell.over .pg-lab{color:#c98a8a}
+.pg-cell.over .pg-val{color:#ff8080}
+.pg-cell.smart .pg-box{color:#6b7484}
+.pg-cell.smart .pg-val{color:#8e99ab}
 
 /* ============ 课表 ============ */
 .schedule{padding:13px 15px 12px;justify-content:flex-start}
@@ -738,14 +752,7 @@ let __plug = null;
 function fmtCd(sec){
   sec = Math.max(0, Math.floor(sec));
   if (sec < 60) return sec + "s";
-  if (sec < 3600) return Math.floor(sec/60) + ":" + pad(sec%60);
-  return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60));
-}
-
-function fmtUsed(sec){
-  sec = Math.max(0, Math.floor(sec));
-  if (sec < 60) return sec + "s";
-  if (sec < 3600) return Math.floor(sec/60) + "m";
+  if (sec < 3600) return Math.floor(sec/60) + "m" + pad(sec%60) + "s";
   return Math.floor(sec/3600) + "h" + pad(Math.floor(sec%3600/60));
 }
 
@@ -757,9 +764,14 @@ function plugShell(){
     <div class="pg-dev">
       <div class="pg-dev-head">
         <span class="pg-dev-name">${d.name.replace(/^荟园\d+栋/, "")}</span>
-        <span class="pg-dev-free">—</span>
+        <span class="pg-dev-free">${d.free}/${d.count}</span>
       </div>
-      <div class="pg-slots">${d.ports.map(p => `<div class="pg-slot"><span class="pg-n">${p.n}</span><span class="pg-t">--</span></div>`).join("")}</div>
+      <div class="pg-grid">${d.ports.map(p => `
+        <div class="pg-cell">
+          <div class="pg-box">${p.n}</div>
+          <span class="pg-lab">·</span>
+          <span class="pg-val">--</span>
+        </div>`).join("")}</div>
     </div>`).join("");
 }
 
@@ -775,32 +787,36 @@ function tickPlug(){
     const devEl = devEls[di];
     if (!devEl) return;
     let f = 0;
-    const slEls = devEl.querySelectorAll(".pg-slot");
+    const cells = devEl.querySelectorAll(".pg-cell");
     d.ports.forEach((p, pi) => {
-      const el = slEls[pi];
-      if (!el) return;
-      const t = el.querySelector(".pg-t");
-      el.className = "pg-slot";
+      const cell = cells[pi];
+      if (!cell) return;
+      const lab = cell.children[1], val = cell.children[2];
+      cell.className = "pg-cell";
       if (p.s === 1){
         f++;
-        el.classList.add("free");
-        t.textContent = "空闲";
+        cell.classList.add("free");
+        lab.textContent = "空闲";
+        val.textContent = "可充";
       } else if (p.m || p.u || !p.d){
-        el.classList.add("smart");
-        t.textContent = "用 " + fmtUsed(now - p.t);
+        cell.classList.add("smart");
+        lab.textContent = "已用";
+        val.textContent = fmtCd(now - p.t);
       } else if (p.d <= now){
-        el.classList.add("over");
-        t.textContent = "到时";
+        cell.classList.add("over");
+        lab.textContent = "到时";
+        val.textContent = "待确认";
       } else {
         const left = p.d - now;
-        if (left < 1800) el.classList.add("soon");
-        t.textContent = fmtCd(left);
+        if (left < 1800) cell.classList.add("soon");
+        lab.textContent = "剩余";
+        val.textContent = fmtCd(left);
       }
     });
     const fe = devEl.querySelector(".pg-dev-free");
     if (fe){
-      fe.textContent = f ? f + " 空" : "满";
-      fe.classList.toggle("none", f === 0);
+      fe.textContent = `${f}/${d.count || d.ports.length}`;
+      fe.classList.toggle("has", f > 0);
     }
     fAll += f;
     cAll += d.count || d.ports.length;
