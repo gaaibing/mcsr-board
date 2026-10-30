@@ -32,7 +32,7 @@ body::before{
 }
 .board{
   position:relative;z-index:1;height:100vh;height:100dvh;
-  display:grid;grid-template-columns:11fr 13fr;grid-template-rows:repeat(15,1fr);
+  display:grid;grid-template-columns:9fr 15fr;grid-template-rows:repeat(15,1fr);
   gap:15px;padding:17px;
 }
 .tile{
@@ -57,11 +57,11 @@ body::before{
 .swap{grid-area:6/2/16/3;animation-delay:.28s;padding:0;overflow:hidden}
 
 /* ============ 时钟 ============ */
-.clock{flex-direction:row;align-items:center;gap:26px}
-.dial{width:clamp(112px,19.5vh,176px);flex:0 0 auto;aspect-ratio:1/1}
+.clock{flex-direction:row;align-items:center;gap:20px}
+.dial{width:clamp(96px,16vh,140px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
 .clock-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.c-date{font-size:clamp(20px,3.0vh,29px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
+.c-date{font-size:clamp(18px,2.6vh,26px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
 .c-date b{color:#fff}
 .c-sub{font-size:clamp(14px,2vh,18px);color:var(--dim);letter-spacing:.02em}
 .c-time{font-size:clamp(32px,5.4vh,54px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:6px}
@@ -78,15 +78,15 @@ body::before{
 .w-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .w-left{display:flex;align-items:center;gap:16px}
 .w-temp{
-  font-size:clamp(40px,7vh,68px);line-height:.92;font-weight:600;letter-spacing:-.035em;
+  font-size:clamp(34px,5.8vh,54px);line-height:.92;font-weight:600;letter-spacing:-.035em;
   background:linear-gradient(180deg,#fff,#9fd8ff);-webkit-background-clip:text;background-clip:text;color:transparent;
 }
 .w-meta{display:flex;flex-direction:column;gap:4px}
 .w-city{font-size:16px;font-weight:700;color:#e6ecf6}
 .w-desc{font-size:14.5px;color:var(--dim)}
 .w-facts{
-  display:grid;grid-template-columns:auto auto;gap:7px 32px;
-  align-content:flex-start;justify-items:start;margin-top:9px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  margin-top:1px;
 }
 .w-fact{font-size:13px;color:var(--dim-2)}
 .w-fact b{color:#c4cddd;font-weight:600}
@@ -108,14 +108,20 @@ body::before{
 .ws-ic.set{color:#ff8f61}
 
 /* ============ 课表 ============ */
-.schedule{padding:13px 15px 14px;justify-content:flex-start}
+.schedule{padding:13px 15px 12px;justify-content:flex-start}
+.sc-body{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  padding-right:2px;
+}
+.sc-body::-webkit-scrollbar{display:none}
 .sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
 .sc-title{font-size:14.5px;font-weight:700;color:#e6ecf6}
 .sc-sub{font-size:12px;color:var(--dim-2)}
 .sc-sep{height:1px;background:var(--line-soft);margin:6px 0}
 .sc-list{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
 .sc-item{
-  flex:1 1 190px;min-width:0;
+  flex:1 1 158px;min-width:0;
   display:flex;flex-direction:column;justify-content:center;gap:1px;
   padding:6px 11px;border-radius:12px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.045);
@@ -135,13 +141,16 @@ body::before{
   background:rgba(255,255,255,.08);color:var(--dim);vertical-align:2px;
 }
 .sc-where{
-  font-size:12px;color:#8e99ab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  line-height:1.3;display:flex;align-items:baseline;gap:9px;
+  font-size:12px;color:#8e99ab;
+  line-height:1.3;display:flex;align-items:baseline;gap:8px;overflow:hidden;
 }
-.sc-where b{color:#c6d0df;font-weight:600}
+.sc-where b{
+  flex:0 1 auto;min-width:0;color:#c6d0df;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .sc-time{
-  font-style:normal;font-weight:700;color:var(--warm);letter-spacing:.01em;
-  font-variant-numeric:tabular-nums;
+  flex:0 0 auto;font-style:normal;font-weight:700;color:var(--warm);
+  letter-spacing:.01em;font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 .schedule.dense .sc-name{font-size:15px}
 .schedule.dense .sc-item{padding:4px 10px}
@@ -152,7 +161,7 @@ body::before{
   border-radius:12px;letter-spacing:.03em;
 }
 .sc-foot{
-  margin-top:auto;padding-top:9px;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);
   font-size:12px;color:var(--dim-2);
   display:flex;justify-content:space-between;align-items:center;gap:10px;
 }
@@ -187,7 +196,7 @@ body::before{
 .mc-elo b{color:#fff;font-weight:700;font-size:1.2em}
 .mc-peak{font-size:clamp(13px,1.8vh,17px);color:var(--dim-2)}
 .mc-peak b{color:var(--dim);font-weight:600}
-.mc-rows{display:flex;flex-direction:column;gap:7px}
+.mc-rows{display:flex;flex-direction:column;gap:11px}
 .mc-row{display:flex;align-items:baseline;gap:12px;min-width:0}
 .mc-tag{
   flex:0 0 auto;font-size:11.5px;letter-spacing:.12em;font-weight:700;color:var(--dim-2);
@@ -195,7 +204,7 @@ body::before{
 }
 .mc-vals{
   font-size:clamp(13px,1.9vh,16.5px);color:#b6c0d3;
-  display:flex;flex-direction:column;gap:4px;min-width:0;
+  display:flex;flex-direction:column;gap:2px;min-width:0;
 }
 .mc-vals span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-vals b{color:#fff;font-weight:700}
@@ -221,8 +230,9 @@ body::before{
 .pane.active{transform:translateY(0);opacity:1;pointer-events:auto}
 .pane.out-down{transform:translateY(107%);opacity:0}
 
-.ch-head{display:flex;align-items:baseline;justify-content:flex-end;margin-bottom:6px}
-.ch-title{font-size:16px;font-weight:700;color:#e6ecf6}
+.ch-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.ch-title{font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--dim-2);text-transform:uppercase}
+.ch-title b{color:#c3cbd9;font-weight:800;margin:0 1px}
 .ch-delta{font-size:16px;font-weight:700}
 .ch-wrap{position:relative;flex:1;min-height:0}
 .ch-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -230,9 +240,10 @@ body::before{
 .ch-y.hi{top:0}
 .ch-y.lo{bottom:0}
 
-.mt-head{display:flex;align-items:baseline;justify-content:flex-end;margin-bottom:9px}
-.mt-sum{font-size:14.5px;color:var(--dim);font-weight:600;white-space:nowrap}
-.mt-sum b{font-weight:700;margin:0 3px}
+.mt-head{display:flex;align-items:baseline;justify-content:flex-start;margin-bottom:9px}
+.mt-sum{font-size:13px;color:var(--dim-2);font-weight:700;letter-spacing:.05em;white-space:nowrap;text-transform:uppercase}
+.mt-sum b{font-weight:800;margin:0 3px}
+.mt-sum .n{color:#c3cbd9}
 .mt-sum .w{color:var(--win)}
 .mt-sum .l{color:var(--lose)}
 .mt-sum .d{color:var(--draw)}
@@ -351,11 +362,13 @@ body::before{
   </section>
 
   <section class="tile schedule" id="schedCard">
-    <div class="sc-head"><span class="sc-title" id="todayTitle">今天</span><span class="sc-sub" id="todaySub">—</span></div>
-    <div class="sc-list" id="todayList"></div>
-    <div class="sc-sep"></div>
-    <div class="sc-head"><span class="sc-title" id="tmrTitle">明天</span><span class="sc-sub" id="tmrSub">—</span></div>
-    <div class="sc-list" id="tmrList"></div>
+    <div class="sc-body">
+      <div class="sc-head"><span class="sc-title" id="todayTitle">今天</span><span class="sc-sub" id="todaySub">—</span></div>
+      <div class="sc-list" id="todayList"></div>
+      <div class="sc-sep"></div>
+      <div class="sc-head"><span class="sc-title" id="tmrTitle">明天</span><span class="sc-sub" id="tmrSub">—</span></div>
+      <div class="sc-list" id="tmrList"></div>
+    </div>
     <div class="sc-foot" id="scFoot"></div>
   </section>
 
@@ -385,6 +398,7 @@ body::before{
   <section class="tile swap">
     <div class="pane active" id="paneChart">
       <div class="ch-head">
+        <span class="ch-title">ELO <b id="chCount">30</b> matches</span>
         <span class="ch-delta" id="chDelta">—</span>
       </div>
       <div class="ch-wrap">
@@ -702,7 +716,8 @@ function drawWeather(h, idx){
   const cw = Math.max(240, wrap.clientWidth || 240);
   const H = Math.max(90, wrap.clientHeight || 120);
   // 12 小时数据画成约 2.1 倍宽，首屏正好看 6 个小时，其余横滑
-  const W = Math.round(cw * 2.1);
+  // 12 小时数据按"一屏正好 5 个整点"排布，其余横滑
+  const W = Math.round(cw * 11 / 4);
   const svg = $("wSvg");
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.style.width = W + "px";
@@ -840,13 +855,14 @@ function paintMCSR(u, ms){
 function drawElo(matches, curElo, color){
   if (!matches || !matches.length) return;
   const pts = [];
-  for (const m of matches.slice(0, 20)){
+  for (const m of matches){
     const c = (m.changes || []).find(x => x.uuid === CFG.uuid);
     if (c && typeof c.eloRate === "number") pts.push({t:m.date, v:c.eloRate});
   }
   pts.sort((a,b) => a.t - b.t);
   if (pts.length < 2) return;
   pts.push({t: Date.now()/1000, v: curElo});
+  $("chCount").textContent = pts.length - 1;
 
   const wrap = document.querySelector(".ch-wrap");
   const rc = wrap.getBoundingClientRect();
@@ -1054,7 +1070,7 @@ function renderMatches(ms, season){
   const sw = g(season && season.wins, "ranked");
   const sl = g(season && season.loses, "ranked");
   const sp = g(season && season.playedMatches, "ranked") || (sw + sl);
-  $("mtSum").innerHTML = `本季 <b>${sp}</b> 场 ·<b class="w">${sw}W</b><b class="l">${sl}L</b>`;
+  $("mtSum").innerHTML = `SEASON <b class="n">${sp}</b> matches · <b class="w">${sw}W</b> <b class="l">${sl}L</b> <b class="d">${d}D</b>`;
 
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
