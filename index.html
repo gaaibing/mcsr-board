@@ -405,8 +405,8 @@ const CFG = {
   swapMs: 15000,
   periods: [
     ["08:00","08:45"],["08:55","09:40"],["10:00","10:45"],["10:55","11:40"],
-    ["14:00","14:45"],["14:55","15:40"],["16:00","16:45"],["16:55","17:40"],
-    ["19:00","19:45"],["19:55","20:40"],["20:50","21:35"],["21:45","22:30"]
+    ["14:30","15:15"],["15:25","16:10"],["16:30","17:15"],["17:25","18:10"],
+    ["19:00","19:45"],["19:50","20:35"],["20:40","21:25"],["21:30","22:15"]
   ]
 };
 
@@ -589,14 +589,38 @@ function renderSchedule(){
 
 /* ============ 天气 ============ */
 const WMO = {
-  0:["晴","☀️"],1:["大部晴","🌤️"],2:["多云","⛅"],3:["阴","☁️"],45:["雾","🌫️"],48:["冻雾","🌫️"],
-  51:["小毛雨","🌦️"],53:["毛雨","🌦️"],55:["大毛雨","🌦️"],56:["冻毛雨","🌧️"],57:["冻毛雨","🌧️"],
-  61:["小雨","🌧️"],63:["中雨","🌧️"],65:["大雨","🌧️"],66:["冻雨","🌧️"],67:["冻雨","🌧️"],
-  71:["小雪","🌨️"],73:["中雪","🌨️"],75:["大雪","🌨️"],77:["雪粒","🌨️"],
-  80:["阵雨","🌦️"],81:["强阵雨","🌧️"],82:["暴阵雨","⛈️"],85:["阵雪","🌨️"],86:["强阵雪","🌨️"],
-  95:["雷阵雨","⛈️"],96:["雷雨伴冰雹","⛈️"],99:["强雷雨冰雹","⛈️"]
+  0:["晴","sun"],1:["大部晴","suncloud"],2:["多云","suncloud"],3:["阴","cloud"],
+  45:["雾","fog"],48:["冻雾","fog"],
+  51:["小毛雨","rain"],53:["毛雨","rain"],55:["大毛雨","rain"],56:["冻毛雨","rain"],57:["冻毛雨","rain"],
+  61:["小雨","rain"],63:["中雨","rain"],65:["大雨","rain"],66:["冻雨","rain"],67:["冻雨","rain"],
+  71:["小雪","snow"],73:["中雪","snow"],75:["大雪","snow"],77:["雪粒","snow"],
+  80:["阵雨","rain"],81:["强阵雨","rain"],82:["暴阵雨","storm"],85:["阵雪","snow"],86:["强阵雪","snow"],
+  95:["雷阵雨","storm"],96:["雷雨伴冰雹","storm"],99:["强雷雨冰雹","storm"]
 };
-const wmoOf = c => WMO[c] || ["未知","·"];
+const wmoOf = c => WMO[c] || ["未知","cloud"];
+
+const WX_SVG = {
+  sun: `<circle cx="8" cy="8" r="3.4" fill="#ffc247"/>
+        <g stroke="#ffc247" stroke-width="1.4" stroke-linecap="round">
+        <line x1="8" y1="1.2" x2="8" y2="2.6"/><line x1="8" y1="13.4" x2="8" y2="14.8"/>
+        <line x1="1.2" y1="8" x2="2.6" y2="8"/><line x1="13.4" y1="8" x2="14.8" y2="8"/>
+        <line x1="3.2" y1="3.2" x2="4.2" y2="4.2"/><line x1="11.8" y1="11.8" x2="12.8" y2="12.8"/>
+        <line x1="12.8" y1="3.2" x2="11.8" y2="4.2"/><line x1="4.2" y1="11.8" x2="3.2" y2="12.8"/></g>`,
+  suncloud: `<circle cx="10.6" cy="5.6" r="2.9" fill="#ffc247"/>
+        <path d="M3.4 12.4h8.3a2.5 2.5 0 0 0 .2-5 3.5 3.5 0 0 0-6.7-.9A2.7 2.7 0 0 0 3.4 12.4z" fill="#9fb0c8"/>`,
+  cloud: `<path d="M3.4 12.2h9.2a2.7 2.7 0 0 0 .2-5.4 3.8 3.8 0 0 0-7.3-1A2.9 2.9 0 0 0 3.4 12.2z" fill="#9fb0c8"/>`,
+  rain: `<path d="M3.6 9.6h8.8a2.6 2.6 0 0 0 .2-5.2 3.7 3.7 0 0 0-7.1-1A2.8 2.8 0 0 0 3.6 9.6z" fill="#9fb0c8"/>
+        <g stroke="#5cc8ff" stroke-width="1.5" stroke-linecap="round">
+        <line x1="5.4" y1="11.2" x2="4.4" y2="14"/><line x1="8.4" y1="11.2" x2="7.4" y2="14"/>
+        <line x1="11.4" y1="11.2" x2="10.4" y2="14"/></g>`,
+  snow: `<path d="M3.6 9.6h8.8a2.6 2.6 0 0 0 .2-5.2 3.7 3.7 0 0 0-7.1-1A2.8 2.8 0 0 0 3.6 9.6z" fill="#9fb0c8"/>
+        <g fill="#bfe6ff"><circle cx="5" cy="12.6" r="1.1"/><circle cx="8" cy="13.6" r="1.1"/><circle cx="11" cy="12.6" r="1.1"/></g>`,
+  storm: `<path d="M3.6 9.4h8.8a2.6 2.6 0 0 0 .2-5.2 3.7 3.7 0 0 0-7.1-1A2.8 2.8 0 0 0 3.6 9.4z" fill="#9fb0c8"/>
+        <path d="M8.6 10.4L6.4 14h2.2l-1 2.6" fill="none" stroke="#ffd24a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  fog: `<g stroke="#9fb0c8" stroke-width="1.6" stroke-linecap="round">
+        <line x1="3" y1="5.6" x2="13" y2="5.6"/><line x1="4.4" y1="8.8" x2="12.4" y2="8.8"/>
+        <line x1="2.6" y1="12" x2="11.6" y2="12"/></g>`
+};
 let __wx = null;
 
 async function loadWeather(){
@@ -624,7 +648,7 @@ function paintWeather(d){
   const cur = d.current;
   const [desc, icon] = wmoOf(cur.weather_code);
   $("wTemp").textContent = Math.round(cur.temperature_2m) + "°";
-  $("wDesc").textContent = icon + " " + desc;
+  $("wDesc").textContent = desc;
   $("wFeel").textContent = Math.round(cur.apparent_temperature) + "°";
   $("wHum").textContent = Math.round(cur.relative_humidity_2m) + "%";
   $("wWind").textContent = Math.round(cur.wind_speed_10m) + " km/h";
@@ -655,7 +679,7 @@ function drawWeather(h, idx){
   const H = Math.max(90, Math.round(rc.height));
   $("wSvg").setAttribute("viewBox", `0 0 ${W} ${H}`);
 
-  const XL = 20, XR = 20, PT = 48, PB = 26;
+  const XL = 22, XR = 22, PT = 50, PB = 26;
   const plotW = W - XL - XR, plotH = H - PT - PB;
   const vals = idx.map(i => h.temperature_2m[i]);
   let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -692,12 +716,11 @@ function drawWeather(h, idx){
     dot.setAttribute("fill", "#0e1219"); dot.setAttribute("stroke", "#5cc8ff"); dot.setAttribute("stroke-width", "1.9");
     nodes.appendChild(dot);
 
-    const [, ic] = wmoOf(h.weather_code[i]);
-    const em = document.createElementNS(NS, "text");
-    em.setAttribute("x", x); em.setAttribute("y", y - 22);
-    em.setAttribute("text-anchor", "middle"); em.setAttribute("font-size", "16");
-    em.textContent = ic;
-    nodes.appendChild(em);
+    const [, kind] = wmoOf(h.weather_code[i]);
+    const ig = document.createElementNS(NS, "g");
+    ig.setAttribute("transform", `translate(${(x-9).toFixed(1)},${(y-34).toFixed(1)}) scale(1.14)`);
+    ig.innerHTML = WX_SVG[kind] || WX_SVG.cloud;
+    nodes.appendChild(ig);
 
     const tt = document.createElementNS(NS, "text");
     tt.setAttribute("x", x); tt.setAttribute("y", y - 37);
@@ -847,9 +870,9 @@ function drawElo(matches, curElo, color){
     tg.appendChild(ln);
 
     const tx = document.createElementNS(NS, "text");
-    tx.setAttribute("x", W-XR);
-    tx.setAttribute("y", y-7);
-    tx.setAttribute("text-anchor", "end");
+    tx.setAttribute("x", XL + 6);
+    tx.setAttribute("y", y - 7);
+    tx.setAttribute("text-anchor", "start");
     tx.setAttribute("font-size", "12");
     tx.setAttribute("font-weight", "700");
     tx.setAttribute("letter-spacing", ".07em");
