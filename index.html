@@ -63,12 +63,12 @@ body::before{
 .cx-stack{position:absolute;inset:0;overflow:hidden}
 .cx-pane{
   position:absolute;inset:0;display:flex;
-  transform:translateX(100%);opacity:0;pointer-events:none;
+  transform:translateY(100%);opacity:0;pointer-events:none;
   transition:transform .52s cubic-bezier(.22,.92,.26,1),opacity .4s ease;
   will-change:transform;
 }
 .cx-pane.on{transform:none;opacity:1;pointer-events:auto}
-.cx-pane.left{transform:translateX(-100%);opacity:0;pointer-events:none}
+.cx-pane.up{transform:translateY(-100%);opacity:0;pointer-events:none}
 .cx-clock{flex-direction:row;align-items:center;gap:22px;padding:20px 24px}
 .dial{width:clamp(96px,18vh,136px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
@@ -306,15 +306,6 @@ body::before{
 .swap{position:relative;touch-action:none}
 .swap-head{position:absolute;top:0;left:0;right:0;z-index:2;padding:19px 24px 0}
 .swap-body{position:absolute;inset:44px 0 0 0;overflow:hidden}
-.swap-dots{
-  position:absolute;left:0;right:0;bottom:13px;z-index:3;
-  display:flex;justify-content:center;gap:7px;pointer-events:none;
-}
-.swap-dot{
-  width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.16);
-  transition:width .45s cubic-bezier(.22,.9,.28,1),background .45s ease;
-}
-.swap-dot.on{width:17px;background:rgba(255,255,255,.6)}
 .pane{
   position:absolute;inset:0;padding:0 24px 34px;display:flex;flex-direction:column;
   transform:translateY(-106%);opacity:0;pointer-events:none;
@@ -594,8 +585,6 @@ body::before{
       <div class="mt-list" id="mtList"></div>
     </div>
     </div>
-
-    <div class="swap-dots"><i class="swap-dot on"></i><i class="swap-dot"></i></div>
   </section>
 
 </div>
@@ -900,7 +889,7 @@ function cxGo(i){
   const a = $("cxClockPane"), b = $("cxPlugPane");
   if (!a || !b) return;
   a.classList.toggle("on", i === 0);
-  a.classList.toggle("left", i > 0);
+  a.classList.toggle("up", i > 0);
   b.classList.toggle("on", i === 1);
   if (i === 1) loadPlug();
 }
@@ -917,8 +906,8 @@ function cxGo(i){
     down = false;
     if (performance.now() - t0 > 1000) return;
     const dx = e.clientX - x0, dy = e.clientY - y0;
-    // 左右任一方向都切页
-    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    // 上下任一方向都切页；横向滑动留给充电桩列表自己滚
+    if (Math.abs(dy) < 45 || Math.abs(dy) < Math.abs(dx) * 1.2) return;
     cxGo(CX.idx === 0 ? 1 : 0);
   });
   el.addEventListener("pointercancel", () => { down = false; });
@@ -1560,9 +1549,7 @@ function renderMatches(ms, season){
 let swapIdx = 0;
 let swapTimer = null;
 let swapLock = 0;
-function syncDots(){
-  document.querySelectorAll(".swap-dot").forEach((d,i) => d.classList.toggle("on", i === swapIdx));
-}
+function syncDots(){}
 function armSwap(){
   clearTimeout(swapTimer);
   swapTimer = setTimeout(swapPanes, CFG.swapMs);
