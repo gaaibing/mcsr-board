@@ -216,6 +216,8 @@ body::before{
 
 /* ============ 轮播 ============ */
 .swap{position:relative;touch-action:none}
+.swap-head{position:absolute;top:0;left:0;right:0;z-index:2;padding:19px 24px 0}
+.swap-body{position:absolute;inset:44px 0 0 0;overflow:hidden}
 .swap-dots{
   position:absolute;left:0;right:0;bottom:13px;z-index:3;
   display:flex;justify-content:center;gap:7px;pointer-events:none;
@@ -226,7 +228,7 @@ body::before{
 }
 .swap-dot.on{width:17px;background:rgba(255,255,255,.6)}
 .pane{
-  position:absolute;inset:0;padding:20px 24px 34px;display:flex;flex-direction:column;
+  position:absolute;inset:0;padding:0 24px 34px;display:flex;flex-direction:column;
   transform:translateY(-106%);opacity:0;pointer-events:none;
   transition:transform .92s cubic-bezier(.22,.92,.26,1),opacity .5s ease;
   will-change:transform;
@@ -234,23 +236,23 @@ body::before{
 .pane.active{transform:translateY(0);opacity:1;pointer-events:auto}
 .pane.out-down{transform:translateY(107%);opacity:0}
 
-.ch-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
-.ch-title{font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--dim-2);text-transform:uppercase}
-.ch-title b{color:#c3cbd9;font-weight:800;margin:0 1px}
-.ch-delta{font-size:16px;font-weight:700}
-.ch-wrap{position:relative;flex:1;min-height:0}
+.ch-wrap{position:relative;flex:1;min-height:0;margin-top:8px}
 .ch-wrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .ch-y{position:absolute;left:0;font-size:12px;color:var(--dim-2);font-weight:600}
 .ch-y.hi{top:0}
 .ch-y.lo{bottom:0}
 
-.mt-head{display:flex;align-items:baseline;justify-content:flex-start;margin-bottom:9px}
+.mt-head{
+  display:flex;align-items:baseline;justify-content:flex-start;gap:15px;
+  font-variant-numeric:tabular-nums;line-height:1.1;
+}
 .mt-sum{font-size:13px;color:var(--dim-2);font-weight:700;letter-spacing:.05em;white-space:nowrap;text-transform:uppercase}
-.mt-sum b{font-weight:800;margin:0 3px}
-.mt-sum .n{color:#c3cbd9}
-.mt-sum .w{color:var(--win)}
-.mt-sum .l{color:var(--lose)}
-.mt-sum .d{color:var(--draw)}
+.mt-sum b{font-weight:800;margin:0 4px;color:#c3cbd9}
+.mt-k{font-size:13px;color:var(--dim-2);font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.mt-k b{font-weight:800;margin-right:1px}
+.mt-k .w{color:var(--win)}
+.mt-k .l{color:var(--lose)}
+.mt-k .d{color:var(--draw)}
 .mt-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
 .mt-row{
   display:grid;grid-template-columns:minmax(0,1fr) 58px 66px 26px 26px 54px;
@@ -283,6 +285,7 @@ body::before{
 .ic.i7{background-position:50% 100%}
 .ic.i8{background-position:75% 100%}
 .ic.i9{background-position:100% 100%}
+.mt-time.ff{font-size:11px;font-weight:800;letter-spacing:.07em;color:#7c8698;text-align:center}
 .mt-ago{font-size:12.5px;color:var(--dim-2);text-align:right;font-variant-numeric:tabular-nums}
 
 /* ============ 竖屏 ============ */
@@ -399,11 +402,16 @@ body::before{
   </section>
 
   <section class="tile swap">
-    <div class="pane active" id="paneChart">
-      <div class="ch-head">
-        <span class="ch-title">ELO <b id="chCount">30</b> matches</span>
-        <span class="ch-delta" id="chDelta">—</span>
+    <div class="swap-head">
+      <div class="mt-head" id="mtHead">
+        <span class="mt-sum">SEASON <b class="n" id="mtPlayed">282</b> MATCHES</span>
+        <span class="mt-k"><b class="w" id="mtWin">129</b>W</span>
+        <span class="mt-k"><b class="l" id="mtLose">109</b>L</span>
+        <span class="mt-k"><b class="d" id="mtDraw">44</b>D</span>
       </div>
+    </div>
+    <div class="swap-body">
+    <div class="pane active" id="paneChart">
       <div class="ch-wrap">
         <svg id="eloSvg" preserveAspectRatio="none" viewBox="0 0 600 200">
           <defs>
@@ -425,10 +433,8 @@ body::before{
     </div>
 
     <div class="pane" id="paneList">
-      <div class="mt-head">
-        <span class="mt-sum" id="mtSum">—</span>
-      </div>
       <div class="mt-list" id="mtList"></div>
+    </div>
     </div>
 
     <div class="swap-dots"><i class="swap-dot on"></i><i class="swap-dot"></i></div>
@@ -868,7 +874,6 @@ function drawElo(matches, curElo, color){
   pts.sort((a,b) => a.t - b.t);
   if (pts.length < 2) return;
   pts.push({t: Date.now()/1000, v: curElo});
-  $("chCount").textContent = pts.length - 1;
 
   const wrap = document.querySelector(".ch-wrap");
   const rc = wrap.getBoundingClientRect();
@@ -1034,10 +1039,6 @@ function drawElo(matches, curElo, color){
   }
 
 
-  const delta = vals[vals.length-1] - vals[0];
-  const el = $("chDelta");
-  el.textContent = (delta >= 0 ? "+" : "") + delta + " elo";
-  el.style.color = delta >= 0 ? "#3ddc84" : "#ff5d6c";
 }
 
 /* ============ 近 10 场 ============ */
@@ -1051,41 +1052,41 @@ function renderMatches(ms, season){
     const opp = (m.players || []).find(p => p.uuid !== me) || {};
     const res = m.result || null;
     const myCh = (m.changes || []).find(c => c.uuid === me);
+    // result.uuid 为空才是平局；平局因分差也可能有 ±1 / ±2 的分值变化，不能按 change 正负判断
     let outcome = "DRAW";
-    if (res && res.uuid){
-      outcome = res.uuid === me ? "WIN" : "LOSE";
-    } else if (myCh && typeof myCh.change === "number"){
-      outcome = myCh.change > 0 ? "WIN" : myCh.change < 0 ? "LOSE" : "DRAW";
-    }
+    if (res && res.uuid) outcome = res.uuid === me ? "WIN" : "LOSE";
+    // 投降是独立的 forfeited 字段，此时时间列显示 FORFEIT
+    const ff = !!(m.forfeited && res && res.uuid);
     const timeMs = (res && res.time) || 0;
     const seed = m.seed || {};
     return {
       outcome,
       opp: opp.nickname || "—",
       time: timeMs,
+      ff,
       ovw: (seed.overworld in OVW_IDX) ? OVW_IDX[seed.overworld] : -1,
       nth: (seed.nether in NTH_IDX) ? NTH_IDX[seed.nether] : -1,
       ts: m.date
     };
   });
 
-  const w = list.filter(x => x.outcome === "WIN").length;
-  const l = list.filter(x => x.outcome === "LOSE").length;
-  const d = list.filter(x => x.outcome === "DRAW").length;
-
-  // 右上角放本赛季累计，不是这 10 场的
+  // 头部是本赛季累计，不是这 10 场；平局数用 总场次 - 胜 - 负 反推
   const g = (o,k) => (o && o[k]) || 0;
   const sw = g(season && season.wins, "ranked");
   const sl = g(season && season.loses, "ranked");
   const sp = g(season && season.playedMatches, "ranked") || (sw + sl);
-  $("mtSum").innerHTML = `SEASON <b class="n">${sp}</b> matches · <b class="w">${sw}W</b> <b class="l">${sl}L</b> <b class="d">${d}D</b>`;
+  const sd = Math.max(0, sp - sw - sl);
+  $("mtPlayed").textContent = sp;
+  $("mtWin").textContent = sw;
+  $("mtLose").textContent = sl;
+  $("mtDraw").textContent = sd;
 
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
     return `<div class="mt-row" style="animation-delay:${i*38}ms">
       <span class="mt-opp">${x.opp}</span>
       <span class="mt-res ${x.outcome}">${x.outcome}</span>
-      <span class="${tc}">${ms2mmss(x.time)}</span>
+      ${x.ff ? `<span class="mt-time ff">FORFEIT</span>` : `<span class="${tc}">${ms2mmss(x.time)}</span>`}
       ${x.ovw >= 0 ? `<span class="ic i${x.ovw}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
       ${x.nth >= 0 ? `<span class="ic i${x.nth}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
       <span class="mt-ago">${ago(x.ts)}</span>
