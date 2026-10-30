@@ -64,9 +64,9 @@ body::before{
 .c-date{font-size:clamp(22px,3.4vh,33px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
 .c-date b{color:#fff}
 .c-sub{font-size:clamp(14px,2vh,18px);color:var(--dim);letter-spacing:.02em}
-.c-time{font-size:clamp(32px,5.4vh,54px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:8px}
+.c-time{font-size:clamp(32px,5.4vh,54px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:6px}
 .c-time small{font-size:.4em;font-weight:500;color:var(--dim-2);margin-left:.12em}
-.daybar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:13px}
+.daybar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px}
 .daybar span{
   display:block;height:100%;border-radius:99px;width:0;
   background:linear-gradient(90deg,rgba(92,200,255,.9),rgba(160,108,255,.9));
@@ -84,19 +84,26 @@ body::before{
 .w-meta{display:flex;flex-direction:column;gap:4px}
 .w-city{font-size:16px;font-weight:700;color:#e6ecf6}
 .w-desc{font-size:14.5px;color:var(--dim)}
-.w-facts{display:flex;flex-wrap:wrap;gap:7px 18px;align-content:flex-start;max-width:54%}
+.w-facts{
+  display:grid;grid-template-columns:auto auto;gap:7px 32px;
+  align-content:flex-start;justify-items:start;margin-top:9px;
+}
 .w-fact{font-size:13px;color:var(--dim-2)}
 .w-fact b{color:#c4cddd;font-weight:600}
-.w-chart{position:relative;flex:1;min-height:86px;margin-top:6px}
+.w-chart{position:relative;flex:1;min-height:56px;margin-top:6px}
 .w-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .w-sun{
-  display:flex;align-items:center;gap:22px;padding-top:10px;margin-top:4px;
+  display:flex;align-items:center;gap:22px;padding-top:8px;margin-top:2px;
   border-top:1px solid var(--line-soft);font-size:13px;color:var(--dim-2);
 }
+.w-sun span{display:inline-flex;align-items:center;gap:6px}
 .w-sun b{color:#c4cddd;font-weight:600}
+.ws-ic{width:16px;height:16px;flex:0 0 auto}
+.ws-ic.rise{color:#ffc46b}
+.ws-ic.set{color:#ff8f61}
 
 /* ============ 课表 ============ */
-.schedule{padding:15px 17px}
+.schedule{padding:15px 17px 34px;justify-content:center}
 .sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
 .sc-title{font-size:16px;font-weight:700;color:#e6ecf6}
 .sc-sub{font-size:13px;color:var(--dim-2)}
@@ -139,7 +146,8 @@ body::before{
   border-radius:14px;letter-spacing:.03em;
 }
 .sc-foot{
-  margin-top:auto;padding-top:10px;font-size:12px;color:var(--dim-2);
+  position:absolute;left:17px;right:17px;bottom:12px;
+  font-size:12px;color:var(--dim-2);
   display:flex;justify-content:space-between;align-items:center;gap:8px;
 }
 .sc-foot b{color:#b3bccf;font-weight:600}
@@ -180,17 +188,26 @@ body::before{
   padding:3px 10px;border-radius:7px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.05);
 }
 .mc-vals{
-  font-size:clamp(13.5px,1.95vh,17px);color:#b6c0d3;
+  font-size:clamp(13px,1.9vh,16.5px);color:#b6c0d3;
   display:flex;flex-direction:column;gap:4px;min-width:0;
 }
 .mc-vals span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mc-vals b{color:#fff;font-weight:700}
-.mc-vals i{font-style:normal;color:var(--dim-2);margin:0 9px;opacity:.5}
+.mc-vals i{font-style:normal;color:var(--dim-2);margin:0 7px;opacity:.5}
 
 /* ============ 轮播 ============ */
-.swap{position:relative}
+.swap{position:relative;touch-action:none}
+.swap-dots{
+  position:absolute;left:0;right:0;bottom:13px;z-index:3;
+  display:flex;justify-content:center;gap:7px;pointer-events:none;
+}
+.swap-dot{
+  width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.16);
+  transition:width .45s cubic-bezier(.22,.9,.28,1),background .45s ease;
+}
+.swap-dot.on{width:17px;background:rgba(255,255,255,.6)}
 .pane{
-  position:absolute;inset:0;padding:20px 24px;display:flex;flex-direction:column;
+  position:absolute;inset:0;padding:20px 24px 34px;display:flex;flex-direction:column;
   transform:translateY(-106%);opacity:0;pointer-events:none;
   transition:transform .92s cubic-bezier(.22,.92,.26,1),opacity .5s ease;
   will-change:transform;
@@ -207,17 +224,17 @@ body::before{
 .ch-y.hi{top:0}
 .ch-y.lo{bottom:0}
 
-.mt-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px}
+.mt-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
 .mt-title{font-size:16px;font-weight:700;color:#e6ecf6}
-.mt-sum{font-size:15px;color:var(--dim);font-weight:600}
+.mt-sum{font-size:14.5px;color:var(--dim);font-weight:600;white-space:nowrap}
 .mt-sum b{font-weight:700;margin:0 3px}
 .mt-sum .w{color:var(--win)}
 .mt-sum .l{color:var(--lose)}
 .mt-sum .d{color:var(--draw)}
-.mt-list{display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.mt-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
 .mt-row{
   display:grid;grid-template-columns:62px minmax(0,1fr) 70px 26px 26px 70px;
-  align-items:center;gap:10px;padding:6px 12px;border-radius:11px;
+  align-items:center;gap:10px;padding:3px 12px;border-radius:11px;
   background:rgba(255,255,255,.026);border:1px solid rgba(255,255,255,.035);
   animation:mtIn .55s cubic-bezier(.19,1.28,.32,1) both;
 }
@@ -322,9 +339,9 @@ body::before{
       </svg>
     </div>
     <div class="w-sun">
-      <span>日出 <b id="wRise">--:--</b></span>
-      <span>日落 <b id="wSet">--:--</b></span>
-      <span style="margin-left:auto">今日 <b id="wRange">--° / --°</b></span>
+      <span><svg class="ws-ic rise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18.5h18"/><path d="M8 18.5a4 4 0 0 1 8 0"/><path d="M12 10V4.5"/><path d="M9.6 6.9L12 4.5l2.4 2.4"/></svg>日出 <b id="wRise">--:--</b></span>
+      <span><svg class="ws-ic set" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18.5h18"/><path d="M8 18.5a4 4 0 0 1 8 0"/><path d="M12 3.5V9"/><path d="M9.6 6.6L12 9l2.4-2.4"/></svg>日落 <b id="wSet">--:--</b></span>
+      <span style="margin-left:auto" class="w-range">今日 <b id="wRange">--° / --°</b></span>
     </div>
   </section>
 
@@ -363,7 +380,7 @@ body::before{
   <section class="tile swap">
     <div class="pane active" id="paneChart">
       <div class="ch-head">
-        <span class="ch-title">ELO · 最近 30 场</span>
+        <span class="ch-title">ELO · 最近 20 场</span>
         <span class="ch-delta" id="chDelta">—</span>
       </div>
       <div class="ch-wrap">
@@ -388,11 +405,13 @@ body::before{
 
     <div class="pane" id="paneList">
       <div class="mt-head">
-        <span class="mt-title">近 10 场</span>
+        <span class="mt-title" id="mtTitle">近 10 场</span>
         <span class="mt-sum" id="mtSum">—</span>
       </div>
       <div class="mt-list" id="mtList"></div>
     </div>
+
+    <div class="swap-dots"><i class="swap-dot on"></i><i class="swap-dot"></i></div>
   </section>
 
 </div>
@@ -808,14 +827,14 @@ function paintMCSR(u, ms){
 
   __eloCache = [ms, elo, tier.color];
   drawElo(ms, elo, tier.color);
-  renderMatches(ms);
+  renderMatches(ms, st.season);
 }
 
 /* ============ ELO 折线（分段着色） ============ */
 function drawElo(matches, curElo, color){
   if (!matches || !matches.length) return;
   const pts = [];
-  for (const m of matches){
+  for (const m of matches.slice(0, 20)){
     const c = (m.changes || []).find(x => x.uuid === CFG.uuid);
     if (c && typeof c.eloRate === "number") pts.push({t:m.date, v:c.eloRate});
   }
@@ -829,7 +848,7 @@ function drawElo(matches, curElo, color){
   const H = Math.max(90, Math.round(rc.height));
   $("eloSvg").setAttribute("viewBox", `0 0 ${W} ${H}`);
 
-  const XL = 48, XR = 12, PT = 20, PB = 18;
+  const XL = 44, XR = 26, PT = 20, PB = 22;
   const plotW = W - XL - XR, plotH = H - PT - PB;
   const vals = pts.map(p => p.v);
   let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -840,7 +859,7 @@ function drawElo(matches, curElo, color){
     const span = Math.max(hi-lo, 20);
     if (up.min <= hi + span*1.1){ hi = Math.max(hi, up.min); tierVal = up.min; }
   }
-  const padV = Math.max(5, (hi-lo)*0.16);
+  const padV = Math.max(4, (hi-lo)*0.10);
   lo -= padV; hi += padV;
   if (hi - lo < 20){ const c = (hi+lo)/2; lo = c-10; hi = c+10; }
 
@@ -855,6 +874,8 @@ function drawElo(matches, curElo, color){
   const mag = Math.pow(10, Math.floor(Math.log10(Math.max(rawStep, 1))));
   const step = Math.max(10, Math.ceil(rawStep / mag) * mag);
   for (let v = Math.ceil(lo / step) * step; v <= hi; v += step){
+    // 段位线所在位置不再重复画普通网格，避免 900 出现两次
+    if (tierVal !== null && Math.abs(v - tierVal) < step * 0.5) continue;
     const y = ny(v);
     const ln = document.createElementNS(NS, "line");
     ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
@@ -904,25 +925,32 @@ function drawElo(matches, curElo, color){
     tg.appendChild(tx);
   }
 
-  // 按段位切分折线
+  // 按段位区域切分折线：每条边都在穿越阈值处打断，颜色取该段中点所在区域
   const xy = pts.map((p,i) => ({x:nx(i), y:ny(p.v), v:p.v}));
-  const segs = [];
-  let cur = [xy[0]];
+  const thrs = TIERS.map(t => t.min).filter(m => m > 0);
+  const cut = [xy[0]];
   for (let i = 1; i < xy.length; i++){
     const a = xy[i-1], b = xy[i];
-    const ta = tierOf(a.v).tier, tb = tierOf(b.v).tier;
-    if (ta.name === tb.name){
-      cur.push(b);
-    } else {
-      const thr = tb.min > ta.min ? tb.min : ta.min;
-      const k = (thr - a.v) / (b.v - a.v);
-      const cp = {x: a.x + (b.x-a.x)*k, y: a.y + (b.y-a.y)*k, v: thr};
-      cur.push(cp);
-      segs.push({color: ta.color, pts: cur});
-      cur = [cp, b];
+    const loV = Math.min(a.v, b.v), hiV = Math.max(a.v, b.v);
+    const cross = thrs.filter(m => m > loV && m < hiV);
+    cross.sort((p,q) => (b.v > a.v ? p - q : q - p));
+    for (const th of cross){
+      const k = (th - a.v) / (b.v - a.v);
+      cut.push({x: a.x + (b.x-a.x)*k, y: a.y + (b.y-a.y)*k, v: th});
     }
+    cut.push(b);
   }
-  if (cur.length > 1) segs.push({color: tierOf(cur[0].v).tier.color, pts: cur});
+
+  const segs = [];
+  let curSeg = null, curColor = null;
+  for (let i = 1; i < cut.length; i++){
+    const a = cut[i-1], b = cut[i];
+    const c = tierOf((a.v + b.v) / 2).tier.color;
+    if (!curSeg){ curSeg = [a, b]; curColor = c; }
+    else if (c === curColor){ curSeg.push(b); }
+    else { segs.push({color: curColor, pts: curSeg}); curSeg = [a, b]; curColor = c; }
+  }
+  if (curSeg && curSeg.length > 1) segs.push({color: curColor, pts: curSeg});
 
   const wrapSeg = $("eloSegs");
   wrapSeg.textContent = "";
@@ -934,7 +962,7 @@ function drawElo(matches, curElo, color){
     p.setAttribute("d", d);
     p.setAttribute("fill", "none");
     p.setAttribute("stroke", sg.color);
-    p.setAttribute("stroke-width", "2.6");
+    p.setAttribute("stroke-width", "2.3");
     p.setAttribute("stroke-linejoin", "miter");
     p.setAttribute("stroke-linecap", "butt");
     wrapSeg.appendChild(p);
@@ -986,7 +1014,7 @@ function drawElo(matches, curElo, color){
 const OVW_IDX = {VILLAGE:0, SHIPWRECK:1, DESERT_TEMPLE:2, BURIED_TREASURE:3, RUINED_PORTAL:4, JUNGLE_TEMPLE:5};
 const NTH_IDX = {TREASURE:6, BRIDGE:7, HOUSING:8, STABLES:9};
 
-function renderMatches(ms){
+function renderMatches(ms, season){
   if (!ms || !ms.length) return;
   const me = CFG.uuid;
   const list = ms.slice(0,10).map(m => {
@@ -1014,7 +1042,14 @@ function renderMatches(ms){
   const w = list.filter(x => x.outcome === "WIN").length;
   const l = list.filter(x => x.outcome === "LOSE").length;
   const d = list.filter(x => x.outcome === "DRAW").length;
-  $("mtSum").innerHTML = `${list.length} 场 ·<b class="w">${w}W</b><b class="l">${l}L</b><b class="d">${d}D</b>`;
+
+  // 右上角放本赛季累计，不是这 10 场的
+  const g = (o,k) => (o && o[k]) || 0;
+  const sw = g(season && season.wins, "ranked");
+  const sl = g(season && season.loses, "ranked");
+  const sp = g(season && season.playedMatches, "ranked") || (sw + sl);
+  $("mtSum").innerHTML = `本季 <b>${sp}</b> 场 ·<b class="w">${sw}W</b><b class="l">${sl}L</b>`;
+  $("mtTitle").textContent = `近 ${list.length} 场`;
 
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
@@ -1031,7 +1066,20 @@ function renderMatches(ms){
 
 /* ============ 轮播 ============ */
 let swapIdx = 0;
+let swapTimer = null;
+let swapLock = 0;
+function syncDots(){
+  document.querySelectorAll(".swap-dot").forEach((d,i) => d.classList.toggle("on", i === swapIdx));
+}
+function armSwap(){
+  clearTimeout(swapTimer);
+  swapTimer = setTimeout(swapPanes, CFG.swapMs);
+}
 function swapPanes(){
+  const t = performance.now();
+  if (t - swapLock < 600){ armSwap(); return; }   // 动画没走完不接受新的切换
+  swapLock = t;
+
   const panes = [$("paneChart"), $("paneList")];
   const cur = panes[swapIdx];
   const next = panes[1-swapIdx];
@@ -1047,15 +1095,36 @@ function swapPanes(){
   next.classList.add("active");
 
   setTimeout(() => cur.classList.remove("out-down"), 1000);
+  syncDots();
+  armSwap();          // 手动滑动后也是从这一刻重新计时
 }
+
+/* 手势：横滑或竖滑都切换，滑动一次只切一屏 */
+(function swipe(){
+  const el = document.querySelector(".swap");
+  let x0 = 0, y0 = 0, t0 = 0, down = false;
+  el.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    down = true; x0 = e.clientX; y0 = e.clientY; t0 = performance.now();
+  });
+  el.addEventListener("pointerup", e => {
+    if (!down) return;
+    down = false;
+    if (performance.now() - t0 > 900) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    if (ay > ax && ay > 42) swapPanes();
+    else if (ax > ay && ax > 56) swapPanes();
+  });
+  el.addEventListener("pointercancel", () => { down = false; });
+})();
 
 /* ============ 启动 ============ */
 tickClock(); setInterval(tickClock, 1000);
 renderSchedule(); setInterval(renderSchedule, 1800000);
 loadWeather(); setInterval(loadWeather, 1800000);
 loadMCSR(); setInterval(loadMCSR, 300000);
-setTimeout(swapPanes, CFG.swapMs);
-setInterval(swapPanes, CFG.swapMs);
+armSwap();
 
 window.addEventListener("resize", () => {
   clearTimeout(window.__rz);
@@ -1073,7 +1142,8 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catc
 if (location.hash === "#list"){
   $("paneChart").classList.remove("active");
   $("paneList").classList.add("active");
-  swapIdx = 0;
+  swapIdx = 1;
+  syncDots();
 }
 </script>
 </body>
