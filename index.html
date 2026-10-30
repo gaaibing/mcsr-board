@@ -51,8 +51,8 @@ body::before{
 @keyframes tileIn{0%{opacity:0;transform:translateY(28px) scale(.955)}60%{opacity:1}100%{opacity:1;transform:none}}
 
 .clock{grid-area:1/1/5/7;animation-delay:.04s}
-.weather{grid-area:5/1/10/7;animation-delay:.1s}
-.schedule{grid-area:10/1/15/7;animation-delay:.16s}
+.weather{grid-area:5/1/9/7;animation-delay:.1s}
+.schedule{grid-area:9/1/15/7;animation-delay:.16s}
 .mcsr{grid-area:1/7/6/13;animation-delay:.22s}
 .swap{grid-area:6/7/15/13;animation-delay:.28s;padding:0;overflow:hidden}
 
@@ -87,7 +87,7 @@ body::before{
 .w-facts{display:flex;flex-wrap:wrap;gap:7px 18px;align-content:flex-start;max-width:54%}
 .w-fact{font-size:13px;color:var(--dim-2)}
 .w-fact b{color:#c4cddd;font-weight:600}
-.w-chart{position:relative;flex:1;min-height:112px;margin-top:10px}
+.w-chart{position:relative;flex:1;min-height:86px;margin-top:6px}
 .w-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .w-sun{
   display:flex;align-items:center;gap:22px;padding-top:10px;margin-top:4px;
@@ -96,14 +96,15 @@ body::before{
 .w-sun b{color:#c4cddd;font-weight:600}
 
 /* ============ 课表 ============ */
-.schedule{padding:18px 22px}
-.sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.schedule{padding:15px 17px}
+.sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
 .sc-title{font-size:16px;font-weight:700;color:#e6ecf6}
 .sc-sub{font-size:13px;color:var(--dim-2)}
-.sc-sep{height:1px;background:var(--line-soft);margin:11px 0}
-.sc-list{display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.sc-sep{height:1px;background:var(--line-soft);margin:7px 0}
+.sc-list{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
 .sc-item{
-  display:flex;gap:15px;align-items:center;padding:11px 15px;border-radius:16px;
+  flex:1 1 190px;min-width:0;
+  display:flex;gap:10px;align-items:center;padding:7px 12px;border-radius:14px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.045);
   animation:scIn .65s cubic-bezier(.19,1.28,.32,1) both;
 }
@@ -112,25 +113,29 @@ body::before{
   background:linear-gradient(100deg,rgba(255,171,94,.16),rgba(255,171,94,.05));
   border-color:rgba(255,171,94,.34);box-shadow:0 0 30px -12px rgba(255,171,94,.6);
 }
-.sc-p{flex:0 0 auto;width:56px;display:flex;flex-direction:column;align-items:center;gap:2px}
-.sc-p .n{font-size:18px;font-weight:700;color:#eef1f7;line-height:1}
-.sc-p .r{font-size:12px;color:var(--dim-2)}
+.sc-p{flex:0 0 auto;width:46px;display:flex;flex-direction:column;align-items:center;gap:0}
+.sc-p .n{font-size:16px;font-weight:700;color:#eef1f7;line-height:1.15}
+.sc-p .r{font-size:10.5px;color:var(--dim-2);line-height:1.25}
+.sc-p .r2{font-size:10.5px;color:#7a8496;line-height:1.25}
 .sc-item.live .sc-p .n{color:var(--warm)}
-.sc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .sc-name{
-  font-size:clamp(16px,2.2vh,20px);font-weight:600;color:#fff;line-height:1.2;
+  font-size:17px;font-weight:600;color:#fff;line-height:1.18;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .sc-name .tag{
-  font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:5px;margin-left:7px;
+  font-size:10px;font-weight:600;padding:1px 5px;border-radius:5px;margin-left:6px;
   background:rgba(255,255,255,.08);color:var(--dim);vertical-align:2px;
 }
-.sc-where{font-size:13.5px;color:#a9b3c6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-where{font-size:12.5px;color:#a9b3c6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 .sc-where b{color:#dbe3f0;font-weight:600}
-.sc-teacher{font-size:11.5px;color:var(--dim-2)}
+.sc-where i{font-style:normal;color:var(--dim-2)}
+.schedule.dense .sc-name{font-size:15.5px}
+.schedule.dense .sc-item{padding:5px 11px}
+.schedule.dense .sc-where{font-size:11.5px}
 .sc-empty{
-  display:flex;align-items:center;justify-content:center;min-height:54px;max-height:104px;
-  font-size:13.5px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
+  flex:1 1 100%;display:flex;align-items:center;justify-content:center;min-height:46px;max-height:84px;
+  font-size:13px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
   border-radius:14px;letter-spacing:.03em;
 }
 .sc-foot{
@@ -323,7 +328,7 @@ body::before{
     </div>
   </section>
 
-  <section class="tile schedule">
+  <section class="tile schedule" id="schedCard">
     <div class="sc-head"><span class="sc-title" id="todayTitle">今天</span><span class="sc-sub" id="todaySub">—</span></div>
     <div class="sc-list" id="todayList"></div>
     <div class="sc-sep"></div>
@@ -374,13 +379,10 @@ body::before{
             </filter>
           </defs>
           <g id="eloGrid"></g>
-          <path id="eloArea" fill="url(#eloFill)"></path>
           <g id="eloSegs"></g>
           <g id="eloTierG"></g>
           <circle id="eloLast" r="4" fill="#c9ccd6"></circle>
         </svg>
-        <span class="ch-y hi" id="eloHi"></span>
-        <span class="ch-y lo" id="eloLo"></span>
       </div>
     </div>
 
@@ -540,11 +542,10 @@ function courseHTML(c, live, idx){
   const st = periodTime(c.s), et = periodTime(c.e);
   const span = c.e > c.s ? `${c.s}-${c.e}` : `${c.s}`;
   return `<div class="sc-item${live ? " live" : ""}" style="animation-delay:${idx*55}ms">
-    <div class="sc-p"><span class="n">${span}</span><span class="r">${st.a}</span></div>
+    <div class="sc-p"><span class="n">${span}</span><span class="r">${st.a}</span><span class="r2">${et.b}</span></div>
     <div class="sc-main">
       <span class="sc-name">${c.n}${c.t && c.t !== "讲课" ? `<span class="tag">${c.t}</span>` : ""}</span>
-      <span class="sc-where"><b>${c.p}</b> · ${st.a}–${et.b}</span>
-      <span class="sc-teacher">${c.tc}</span>
+      <span class="sc-where"><b>${c.p}</b> · <i>${c.tc}</i></span>
     </div>
   </div>`;
 }
@@ -576,6 +577,9 @@ function renderSchedule(){
   $("tmrList").innerHTML = list.length
     ? list.map((c,i) => courseHTML(c, false, i)).join("")
     : `<div class="sc-empty">明天没有课</div>`;
+
+  // 条目多时收紧排版，保证不裁切
+  $("schedCard").classList.toggle("dense", remain.length + list.length > 5);
 
   const nx = nextClass();
   if (nx){
@@ -771,6 +775,7 @@ function countUp(el, to, dur = 1100, suffix = ""){
 }
 
 let __eloCache = null;
+let __eloAnimated = false;
 async function loadMCSR(){
   let user, matches;
   try{
@@ -795,7 +800,7 @@ function paintMCSR(u, ms){
   $("mcRank").textContent = "#" + (u.eloRank || "—");
   $("mcName").textContent = u.nickname || CFG.user;
   countUp($("mcElo"), elo, 1200);
-  $("mcPeak").innerHTML = `<b>${(u.seasonResult||{}).highest || "—"}</b> peak`;
+  $("mcPeak").textContent = (u.seasonResult || {}).highest || "—";
 
   const st = u.statistics || {};
   $("mcSeasonVals").innerHTML = statLine(st.season);
@@ -843,16 +848,31 @@ function drawElo(matches, curElo, color){
   const ny = v => PT + (1 - (v-lo)/(hi-lo)) * plotH;
 
   // 网格
+  // 纵轴刻度：取 10 的整数倍步长，每条都带数值
   const grid = $("eloGrid");
   grid.textContent = "";
-  for (let i = 0; i <= 4; i++){
-    const y = PT + (plotH*i)/4;
+  const rawStep = (hi - lo) / 4;
+  const mag = Math.pow(10, Math.floor(Math.log10(Math.max(rawStep, 1))));
+  const step = Math.max(10, Math.ceil(rawStep / mag) * mag);
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step){
+    const y = ny(v);
     const ln = document.createElementNS(NS, "line");
-    ln.setAttribute("x1", XL); ln.setAttribute("x2", W-XR);
+    ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
     ln.setAttribute("y1", y); ln.setAttribute("y2", y);
-    ln.setAttribute("stroke", "rgba(255,255,255,.075)");
-    ln.setAttribute("stroke-dasharray", "2 6");
+    ln.setAttribute("stroke", "rgba(255,255,255,.085)");
+    ln.setAttribute("stroke-width", "1");
+    ln.setAttribute("stroke-dasharray", "3 6");
     grid.appendChild(ln);
+
+    const tx = document.createElementNS(NS, "text");
+    tx.setAttribute("x", XL - 9);
+    tx.setAttribute("y", y + 4);
+    tx.setAttribute("text-anchor", "end");
+    tx.setAttribute("font-size", "12");
+    tx.setAttribute("font-weight", "600");
+    tx.setAttribute("fill", "rgba(150,161,182,.85)");
+    tx.textContent = v;
+    grid.appendChild(tx);
   }
 
   // 段位分界线
@@ -917,19 +937,9 @@ function drawElo(matches, curElo, color){
     p.setAttribute("stroke-width", "2.6");
     p.setAttribute("stroke-linejoin", "miter");
     p.setAttribute("stroke-linecap", "butt");
-    p.setAttribute("filter", "url(#eloGlow)");
     wrapSeg.appendChild(p);
     anims.push(p);
   });
-
-  // 填充：整条路径，用最高段位色
-  let dAll = "";
-  xy.forEach((p,i) => { dAll += (i ? " L " : "M ") + p.x.toFixed(1) + " " + p.y.toFixed(1); });
-  const baseY = H - PB;
-  $("eloArea").setAttribute("d", dAll + ` L ${xy[xy.length-1].x.toFixed(1)} ${baseY} L ${xy[0].x.toFixed(1)} ${baseY} Z`);
-  const topTier = tierOf(Math.max.apply(null, vals)).tier;
-  $("eloFillTop").setAttribute("stop-color", topTier.color);
-  $("eloFillBot").setAttribute("stop-color", color);
 
   const last = xy[xy.length-1];
   const dot = $("eloLast");
@@ -938,29 +948,33 @@ function drawElo(matches, curElo, color){
   dot.setAttribute("fill", color);
 
   // 生长动画
-  anims.forEach(p => {
-    const L = p.getTotalLength();
-    p.style.transition = "none";
-    p.style.strokeDasharray = L;
-    p.style.strokeDashoffset = L;
-  });
-  requestAnimationFrame(() => {
+  if (!__eloAnimated){
+    __eloAnimated = true;
     anims.forEach(p => {
       const L = p.getTotalLength();
-      p.style.transition = `stroke-dashoffset ${(1.1 + L/1400).toFixed(2)}s cubic-bezier(.22,.9,.28,1)`;
-      p.style.strokeDashoffset = 0;
+      p.style.transition = "none";
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
     });
-  });
-
-  dot.style.transition = "none";
-  dot.style.opacity = 0;
-  requestAnimationFrame(() => {
-    dot.style.transition = "opacity .4s ease 1.2s";
+    requestAnimationFrame(() => {
+      anims.forEach(p => {
+        const L = p.getTotalLength();
+        p.style.transition = `stroke-dashoffset ${(1.1 + L/1400).toFixed(2)}s cubic-bezier(.22,.9,.28,1)`;
+        p.style.strokeDashoffset = 0;
+      });
+    });
+    dot.style.transition = "none";
+    dot.style.opacity = 0;
+    requestAnimationFrame(() => {
+      dot.style.transition = "opacity .4s ease 1.2s";
+      dot.style.opacity = 1;
+    });
+  } else {
+    anims.forEach(p => { p.style.transition = "none"; p.style.strokeDashoffset = 0; p.style.strokeDasharray = "none"; });
+    dot.style.transition = "none";
     dot.style.opacity = 1;
-  });
+  }
 
-  $("eloHi").textContent = Math.round(Math.max.apply(null, vals));
-  $("eloLo").textContent = Math.round(Math.min.apply(null, vals));
 
   const delta = vals[vals.length-1] - vals[0];
   const el = $("chDelta");
@@ -1033,13 +1047,12 @@ function swapPanes(){
   next.classList.add("active");
 
   setTimeout(() => cur.classList.remove("out-down"), 1000);
-  if (swapIdx === 0 && __eloCache) drawElo.apply(null, __eloCache);
 }
 
 /* ============ 启动 ============ */
 tickClock(); setInterval(tickClock, 1000);
-renderSchedule(); setInterval(renderSchedule, 60000);
-loadWeather(); setInterval(loadWeather, 600000);
+renderSchedule(); setInterval(renderSchedule, 1800000);
+loadWeather(); setInterval(loadWeather, 1800000);
 loadMCSR(); setInterval(loadMCSR, 300000);
 setTimeout(swapPanes, CFG.swapMs);
 setInterval(swapPanes, CFG.swapMs);
