@@ -1332,6 +1332,7 @@ function drawElo(matches, curElo, color){
 
   // 视野内所有段位分界线
   const tierLines = TIERS.filter(t => t.min > 0 && t.min >= lo && t.min <= hi);
+  const axisPts = [];   // 坐标轴刻度/段位标签位置，卡片压上去要重罚
 
   const nx = i => XL + (i/(pts.length-1)) * plotW;
   const ny = v => PT + (1 - (v-lo)/(hi-lo)) * plotH;
@@ -1343,6 +1344,7 @@ function drawElo(matches, curElo, color){
     // 与段位线重合时刻度照写数字，只是不再画灰色虚线（那条线已经由段位线占据）
     const atTier = tierLines.some(t => Math.abs(v - t.min) < step * 0.5);
     const y = ny(v);
+    axisPts.push({ x: 22, y: y, w: 8 });
     if (!atTier){
       const ln = document.createElementNS(NS, "line");
       ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
@@ -1369,6 +1371,7 @@ function drawElo(matches, curElo, color){
   tg.textContent = "";
   for (const t of tierLines){
     const y = ny(t.min);
+    axisPts.push({ x: W - 70, y: y, w: 8 });
     const ln = document.createElementNS(NS, "line");
     ln.setAttribute("x1", XL); ln.setAttribute("x2", W - XR);
     ln.setAttribute("y1", y); ln.setAttribute("y2", y);
@@ -1485,43 +1488,45 @@ function drawElo(matches, curElo, color){
     dot.style.opacity = 1;
   }
 
-  placeLatestCard(xy, W, H);
+  placeLatestCard(xy, W, H, axisPts, XL);
 }
 
-/* 悬浮卡片自动选角落：优先顺序 右上 → 右下 → 左下 → 左上，前一个被挡明显才顺延 */
+/* 悬浮卡片自动选角落：优先顺序 右上 → 右下 → 左下 → 左上，压到坐标轴重罚 */
 let __ltSpot = -1, __ltBlock = Infinity;
-function placeLatestCard(xy, W, H){
+function placeLatestCard(xy, W, H, axisPts, XL){
   const card = $("ltCard");
   if (!card || card.style.display === "none") return;
   const cw = card.offsetWidth || 268;
   const ch = card.offsetHeight || 62;
   const gap = 4;
+  const leftX = XL + 2;                            // 左侧不越过 y 轴刻度
   const spots = [
-    { x: W - cw - 2, y: gap },              // 0 右上
-    { x: W - cw - 2, y: H - ch - gap },     // 1 右下
-    { x: 2, y: H - ch - gap },              // 2 左下
-    { x: 2, y: gap },                        // 3 左上
+    { x: W - cw - 2, y: gap },                     // 0 右上
+    { x: W - cw - 2, y: H - ch - gap },            // 1 右下
+    { x: leftX, y: H - ch - gap },                 // 2 左下
+    { x: leftX, y: gap },                           // 3 左上
   ];
   const samples = [];
   for (let i = 1; i < xy.length; i++){
     const a = xy[i-1], b = xy[i];
     for (let k = 0; k <= 14; k++){
-      samples.push({ x: a.x + (b.x - a.x) * k / 14, y: a.y + (b.y - a.y) * k / 14 });
+      samples.push({ x: a.x + (b.x - a.x) * k / 14, y: a.y + (b.y - a.y) * k / 14, w: 1 });
     }
   }
   // 最新那个点权重大一些，尽量别盖住
   const last = xy[xy.length - 1];
-  for (let i = 0; i < 6; i++) samples.push(last);
+  for (let i = 0; i < 6; i++) samples.push({ x: last.x, y: last.y, w: 1 });
 
+  const all = samples.concat(axisPts || []);
   const scores = spots.map(s => {
     let n = 0;
-    for (const p of samples){
-      if (p.x >= s.x - 8 && p.x <= s.x + cw + 8 && p.y >= s.y - 8 && p.y <= s.y + ch + 8) n++;
+    for (const p of all){
+      if (p.x >= s.x - 8 && p.x <= s.x + cw + 8 && p.y >= s.y - 10 && p.y <= s.y + ch + 10) n += (p.w || 1);
     }
     return n;
   });
 
-  const TOL = 1;                                   // 遮挡 1 个采样点以内认为「这块是空的」
+  const TOL = 1;                                   // 遮挡 1 分以内认为「这块是空的」
   let pick = scores.findIndex(v => v <= TOL);
   if (pick < 0) pick = scores.indexOf(Math.min.apply(null, scores));
 
