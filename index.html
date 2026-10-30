@@ -70,12 +70,6 @@ body::before{
 .cx-pane.on{transform:none;opacity:1;pointer-events:auto}
 .cx-pane.left{transform:translateX(-100%);opacity:0;pointer-events:none}
 .cx-clock{flex-direction:row;align-items:center;gap:22px;padding:20px 24px}
-.cx-dots{
-  position:absolute;left:0;right:0;bottom:8px;z-index:5;
-  display:flex;justify-content:center;gap:6px;pointer-events:none;
-}
-.cx-dot{width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.18);transition:width .4s,background .4s}
-.cx-dot.on{width:15px;background:rgba(255,255,255,.55)}
 .dial{width:clamp(96px,18vh,136px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
 .clock-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;margin-top:0}
@@ -128,50 +122,61 @@ body::before{
 .ws-ic.set{color:#ff8f61}
 
 /* ============ 充电桩 ============ */
-.pg{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;padding:14px 16px 15px}
-.pg-head{display:flex;align-items:baseline;gap:9px}
+.pg{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;padding:14px 0 12px 16px}
+.pg-head{display:flex;align-items:baseline;gap:9px;padding-right:16px}
 .pg-title{font-size:15px;font-weight:800;color:#e6ecf6;letter-spacing:.02em;white-space:nowrap}
 .pg-free{font-size:12.5px;font-weight:800;color:#3fd07a;white-space:nowrap}
 .pg-free.none{color:#7c8698}
+.pg-next{font-size:11px;color:var(--dim-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pg-next b{color:#ffab5e;font-weight:700}
 .pg-sub{margin-left:auto;font-size:11px;color:var(--dim-2);white-space:nowrap}
-.pg-devs{display:flex;gap:10px;min-height:0}
-.pg-dev{
-  flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:7px;
-  padding:8px 10px 10px;border-radius:14px;
-  background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.042);
+.pg-devs{
+  display:flex;gap:8px;align-items:stretch;flex:1;min-height:0;
+  overflow-x:auto;overflow-y:hidden;touch-action:pan-x;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  padding-right:16px;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
 }
-.pg-dev-head{display:flex;align-items:baseline;gap:7px}
-.pg-dev-name{font-size:13.5px;font-weight:800;color:#dfe6f0;letter-spacing:.02em;white-space:nowrap}
-.pg-dev-free{font-size:10.5px;font-weight:700;color:#5f6a7c;white-space:nowrap}
-.pg-dev-free.has{color:#3fd07a}
-.pg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
-.pg-cell{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-.pg-box{
-  width:100%;height:57px;border-radius:11px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:700;color:#8b96a8;
-  background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.055);
-  transition:background .35s ease,border-color .35s ease,color .35s ease,box-shadow .35s ease;
+.pg-devs::-webkit-scrollbar{display:none}
+.pg-card{
+  --p:0%;--fill:rgba(92,200,255,.20);
+  position:relative;overflow:hidden;isolation:isolate;
+  flex:0 0 auto;width:88px;border-radius:14px;padding:0 5px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.055);
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
 }
-.pg-lab{font-size:8.5px;color:#7c8698;line-height:1;white-space:nowrap}
-.pg-val{font-size:11px;font-weight:700;color:#b9c3d2;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
-.pg-cell.free .pg-box{
-  background:linear-gradient(160deg,rgba(63,208,122,.34),rgba(63,208,122,.13));
-  border-color:rgba(63,208,122,.62);color:#eafff3;
-  box-shadow:0 0 24px -8px rgba(63,208,122,.9);
+.pg-card::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:var(--p);
+  background:var(--fill);z-index:0;
+  transition:height .8s cubic-bezier(.22,.92,.26,1),background .35s ease;
 }
-.pg-cell.free .pg-lab{color:#5fd08c}
-.pg-cell.free .pg-val{color:#3fd07a}
-.pg-cell.soon .pg-box{
-  background:linear-gradient(160deg,rgba(255,171,94,.22),rgba(255,171,94,.07));
-  border-color:rgba(255,171,94,.46);color:#ffe0bb;
+.pg-card-id,.pg-card-val,.pg-card-lab{position:relative;z-index:1}
+.pg-card-id{display:flex;align-items:baseline;gap:4px;font-size:12px;line-height:1}
+.pg-card-id b{font-weight:800;color:#b6c2d4;letter-spacing:.02em}
+.pg-card-id i{font-style:normal;font-weight:700;color:#788392}
+.pg-card-val{font-size:20px;font-weight:700;color:#c3ccdb;line-height:1;font-variant-numeric:tabular-nums}
+.pg-card-lab{font-size:9.5px;color:#7c8698;line-height:1;white-space:nowrap}
+.pg-card.free{
+  --p:100%;--fill:linear-gradient(180deg,rgba(63,208,122,.40),rgba(63,208,122,.18));
+  background:rgba(63,208,122,.05);
+  border-color:rgba(63,208,122,.6);box-shadow:0 0 26px -10px rgba(63,208,122,.9);
 }
-.pg-cell.soon .pg-val{color:#ffab5e}
-.pg-cell.over .pg-box{background:rgba(255,107,107,.13);border-color:rgba(255,107,107,.42);color:#ffc0c0}
-.pg-cell.over .pg-lab{color:#c98a8a}
-.pg-cell.over .pg-val{color:#ff8080}
-.pg-cell.smart .pg-box{color:#6b7484}
-.pg-cell.smart .pg-val{color:#8e99ab}
+.pg-card.free .pg-card-id b{color:#bdf5d3}
+.pg-card.free .pg-card-val{color:#3fd07a}
+.pg-card.free .pg-card-lab{color:#5fd08c}
+.pg-card.soon{
+  --fill:linear-gradient(180deg,rgba(255,171,94,.20),rgba(255,171,94,.07));
+  border-color:rgba(255,171,94,.46);
+}
+.pg-card.soon .pg-card-val{color:#ffab5e}
+.pg-card.over{--fill:linear-gradient(180deg,rgba(255,107,107,.28),rgba(255,107,107,.12));border-color:rgba(255,107,107,.42)}
+.pg-card.over .pg-card-val{color:#ff8080}
+.pg-card.over .pg-card-lab{color:#c98a8a}
+.pg-card.smart{--fill:rgba(255,255,255,.055)}
+.pg-card.smart .pg-card-val{color:#8e99ab;font-size:17px}
+.pg-card.smart .pg-card-lab{color:#66707f}
 
 /* ============ 课表 ============ */
 .schedule{padding:13px 15px 12px;justify-content:flex-start}
@@ -328,6 +333,7 @@ body::before{
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   box-shadow:0 12px 30px -16px rgba(0,0,0,.95);
   font-variant-numeric:tabular-nums;
+  transition:left .38s cubic-bezier(.22,.92,.26,1),top .38s cubic-bezier(.22,.92,.26,1);
 }
 .lt-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;padding-right:11px}
 .lt-top{display:flex;align-items:baseline;gap:9px;margin-bottom:2px}
@@ -454,13 +460,13 @@ body::before{
         <div class="pg-head">
           <span class="pg-title">荟9 充电桩</span>
           <span class="pg-free" id="pgFree">—</span>
+          <span class="pg-next" id="pgNext"></span>
           <span class="pg-sub" id="pgSub">未连接</span>
         </div>
         <div class="pg-devs" id="pgDevs"></div>
       </div>
     </div>
    </div>
-   <div class="cx-dots"><i class="cx-dot on" id="cxDot0"></i><i class="cx-dot" id="cxDot1"></i></div>
   </section>
 
   <section class="tile weather">
@@ -760,19 +766,42 @@ function plugShell(){
   const box = $("pgDevs");
   if (!box) return;
   const ds = (__plug && __plug.devices) || [];
-  box.innerHTML = ds.map(d => `
-    <div class="pg-dev">
-      <div class="pg-dev-head">
-        <span class="pg-dev-name">${d.name.replace(/^荟园\d+栋/, "")}</span>
-        <span class="pg-dev-free">${d.free}/${d.count}</span>
-      </div>
-      <div class="pg-grid">${d.ports.map(p => `
-        <div class="pg-cell">
-          <div class="pg-box">${p.n}</div>
-          <span class="pg-lab">·</span>
-          <span class="pg-val">--</span>
-        </div>`).join("")}</div>
-    </div>`).join("");
+  let html = "";
+  ds.forEach((d, di) => {
+    const tag = d.tag || d.name.replace(/^荟园\d+栋/, "").replace(/号$/, "");
+    d.ports.forEach(p => {
+      html += `<div class="pg-card" data-di="${di}" data-pn="${p.n}">`
+        + `<div class="pg-card-id"><b>${tag}</b><i>${p.n}</i></div>`
+        + `<div class="pg-card-val">--</div>`
+        + `<div class="pg-card-lab">·</div></div>`;
+    });
+  });
+  box.innerHTML = html;
+  __plugOrderKey = "";
+  applyPlugOrder();
+}
+
+// 排序：空闲 → 定时充（剩余由短到长）→ 智能充（已用由长到短）
+let __plugOrderKey = "";
+function applyPlugOrder(){
+  const box = $("pgDevs");
+  if (!box || !__plug || !__plug.devices) return;
+  const cells = Array.from(box.children).map(el => {
+    const d = __plug.devices[+el.dataset.di];
+    const p = d && d.ports.find(x => x.n === +el.dataset.pn);
+    return p ? { el, p } : null;
+  }).filter(Boolean);
+
+  const isSmart = p => p.s !== 1 && (p.m || p.u || !p.d);
+  const free  = cells.filter(x => x.p.s === 1);
+  const timed = cells.filter(x => x.p.s !== 1 && !isSmart(x.p)).sort((a, b) => a.p.d - b.p.d);
+  const smart = cells.filter(x => x.p.s !== 1 && isSmart(x.p)).sort((a, b) => a.p.t - b.p.t);
+  const ordered = free.concat(timed, smart);
+
+  const key = ordered.map(x => x.el.dataset.di + "-" + x.el.dataset.pn).join(",");
+  if (key === __plugOrderKey) return;
+  __plugOrderKey = key;
+  ordered.forEach((x, i) => { x.el.style.order = i; });
 }
 
 function tickPlug(){
@@ -781,51 +810,59 @@ function tickPlug(){
   if (!box) return;
   const now = Date.now() / 1000;
   let fAll = 0, cAll = 0;
-  const devEls = box.children;
+  let nextD = null, nextP = null;
 
-  __plug.devices.forEach((d, di) => {
-    const devEl = devEls[di];
-    if (!devEl) return;
-    let f = 0;
-    const cells = devEl.querySelectorAll(".pg-cell");
-    d.ports.forEach((p, pi) => {
-      const cell = cells[pi];
-      if (!cell) return;
-      const lab = cell.children[1], val = cell.children[2];
-      cell.className = "pg-cell";
-      if (p.s === 1){
-        f++;
-        cell.classList.add("free");
-        lab.textContent = "空闲";
-        val.textContent = "可充";
-      } else if (p.m || p.u || !p.d){
-        cell.classList.add("smart");
-        lab.textContent = "已用";
-        val.textContent = fmtCd(now - p.t);
-      } else if (p.d <= now){
-        cell.classList.add("over");
-        lab.textContent = "到时";
-        val.textContent = "待确认";
-      } else {
-        const left = p.d - now;
-        if (left < 1800) cell.classList.add("soon");
-        lab.textContent = "剩余";
-        val.textContent = fmtCd(left);
+  for (const el of box.children){
+    const d = __plug.devices[+el.dataset.di];
+    if (!d) continue;
+    const p = d.ports.find(x => x.n === +el.dataset.pn);
+    if (!p) continue;
+    const val = el.querySelector(".pg-card-val");
+    const lab = el.querySelector(".pg-card-lab");
+    el.className = "pg-card";
+    const setP = v => el.style.setProperty("--p", (v <= 0 ? 0 : v >= 100 ? 100 : v).toFixed(1) + "%");
+    if (p.s === 1){
+      fAll++;
+      el.classList.add("free");
+      val.textContent = "空";
+      lab.textContent = "可充";
+      setP(100);
+    } else if (p.m || p.u || !p.d){
+      el.classList.add("smart");
+      val.textContent = fmtCd(now - p.t);
+      lab.textContent = "已用";
+      setP((now - p.t) / 32400 * 100);          // 智能充按 9 小时上限估个进度
+    } else if (p.d <= now){
+      el.classList.add("over");
+      val.textContent = "到时";
+      lab.textContent = "待确认";
+      setP(100);
+    } else {
+      const left = p.d - now;
+      if (left < 1800) el.classList.add("soon");
+      val.textContent = fmtCd(left);
+      lab.textContent = "剩余";
+      const span = p.d - p.t;
+      setP(span > 0 ? (now - p.t) / span * 100 : 0);
+      if (!nextD || p.d < nextD){
+        nextD = p.d; nextP = d.tag + " " + p.n;
       }
-    });
-    const fe = devEl.querySelector(".pg-dev-free");
-    if (fe){
-      fe.textContent = `${f}/${d.count || d.ports.length}`;
-      fe.classList.toggle("has", f > 0);
     }
-    fAll += f;
-    cAll += d.count || d.ports.length;
-  });
+  }
+
+  __plug.devices.forEach(d => { cAll += d.count || d.ports.length; });
 
   const pf = $("pgFree");
   if (pf){
     pf.textContent = `空闲 ${fAll}/${cAll}`;
     pf.classList.toggle("none", fAll === 0);
+  }
+
+  const nx = $("pgNext");
+  if (nx){
+    if (fAll > 0){ nx.innerHTML = ""; }
+    else if (nextP){ nx.innerHTML = `最快 <b>${nextP}</b> ${fmtCd(nextD - now)}`; }
+    else { nx.textContent = "全是智能充"; }
   }
 
   const at = (__plug.devices[0] || {}).at;
@@ -842,12 +879,14 @@ async function loadPlug(){
     if (!r.ok) throw new Error("http " + r.status);
     const d = await r.json();
     if (!d || !Array.isArray(d.devices) || !d.devices.length) throw new Error("bad payload");
-    // 按名称固定顺序：东1 在上、东2 在下
+    // 固定设备顺序，并生成短标签（东1 / 东2）
     d.devices.sort((a, b) => a.name.localeCompare(b.name, "zh"));
+    d.devices.forEach(x => { x.tag = x.name.replace(/^荟园\d+栋/, "").replace(/号$/, ""); });
     const rebuild = !__plug || __plug.devices.length !== d.devices.length
       || __plug.devices.some((x, i) => x.name !== d.devices[i].name);
     __plug = d;
     if (rebuild) plugShell();
+    else applyPlugOrder();
     tickPlug();
   }catch(e){
     const s = $("pgSub");
@@ -863,8 +902,6 @@ function cxGo(i){
   a.classList.toggle("on", i === 0);
   a.classList.toggle("left", i > 0);
   b.classList.toggle("on", i === 1);
-  $("cxDot0").classList.toggle("on", i === 0);
-  $("cxDot1").classList.toggle("on", i === 1);
   if (i === 1) loadPlug();
 }
 (function cxSwipe(){
@@ -880,9 +917,9 @@ function cxGo(i){
     down = false;
     if (performance.now() - t0 > 1000) return;
     const dx = e.clientX - x0, dy = e.clientY - y0;
+    // 左右任一方向都切页
     if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    if (dx < 0 && CX.idx === 0) cxGo(1);
-    else if (dx > 0 && CX.idx === 1) cxGo(0);
+    cxGo(CX.idx === 0 ? 1 : 0);
   });
   el.addEventListener("pointercancel", () => { down = false; });
 })();
@@ -1374,7 +1411,47 @@ function drawElo(matches, curElo, color){
     dot.style.opacity = 1;
   }
 
+  placeLatestCard(xy, W, H);
+}
 
+/* 悬浮卡片自动选角落：折线在四个角哪块最空就待在哪，差异不明显时不挪窝 */
+let __ltSpot = -1, __ltScore = Infinity;
+function placeLatestCard(xy, W, H){
+  const card = $("ltCard");
+  if (!card || card.style.display === "none") return;
+  const cw = card.offsetWidth || 268;
+  const ch = card.offsetHeight || 62;
+  const gap = 4;
+  const spots = [
+    { x: W - cw - 2, y: gap },
+    { x: 2, y: gap },
+    { x: W - cw - 2, y: H - ch - gap },
+    { x: 2, y: H - ch - gap },
+  ];
+  const samples = [];
+  for (let i = 1; i < xy.length; i++){
+    const a = xy[i-1], b = xy[i];
+    for (let k = 0; k <= 6; k++){
+      samples.push({ x: a.x + (b.x - a.x) * k / 6, y: a.y + (b.y - a.y) * k / 6 });
+    }
+  }
+  let best = 0, bestScore = Infinity;
+  spots.forEach((s, i) => {
+    let n = 0;
+    for (const p of samples){
+      if (p.x >= s.x - 8 && p.x <= s.x + cw + 8 && p.y >= s.y - 8 && p.y <= s.y + ch + 8) n++;
+    }
+    n += i * 0.01;                                   // 平手时优先右上 > 左上 > 右下 > 左下
+    if (n < bestScore){ bestScore = n; best = i; }
+  });
+  if (best === __ltSpot) return;
+  if (__ltSpot >= 0 && bestScore > __ltScore - 5) return;  // 迟滞，避免来回跳
+  __ltSpot = best;
+  __ltScore = bestScore;
+  const s = spots[best];
+  card.style.right = "auto";
+  card.style.left = Math.max(0, Math.min(Math.round(s.x), W - cw)) + "px";
+  card.style.top = Math.round(s.y) + "px";
 }
 
 /* ============ 近 10 场 ============ */
