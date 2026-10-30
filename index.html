@@ -143,8 +143,8 @@ body::before{
 .pg-card{
   --p:0%;--fill:rgba(92,200,255,.20);
   position:relative;overflow:hidden;isolation:isolate;
-  flex:0 0 auto;width:88px;border-radius:14px;padding:0 5px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  flex:0 0 auto;width:96px;border-radius:14px;padding:0 6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.055);
   transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
 }
@@ -153,18 +153,18 @@ body::before{
   background:var(--fill);z-index:0;
   transition:height .8s cubic-bezier(.22,.92,.26,1),background .35s ease;
 }
-.pg-card-id,.pg-card-val,.pg-card-lab{position:relative;z-index:1}
-.pg-card-id{display:flex;align-items:baseline;gap:4px;font-size:12px;line-height:1}
-.pg-card-id b{font-weight:800;color:#b6c2d4;letter-spacing:.02em}
-.pg-card-id i{font-style:normal;font-weight:700;color:#788392}
-.pg-card-val{font-size:20px;font-weight:700;color:#c3ccdb;line-height:1;font-variant-numeric:tabular-nums}
-.pg-card-lab{font-size:9.5px;color:#7c8698;line-height:1;white-space:nowrap}
+.pg-card-id,.pg-card-n,.pg-card-val,.pg-card-lab{position:relative;z-index:1}
+.pg-card-id{font-size:13.5px;font-weight:800;color:#aab6c8;line-height:1;letter-spacing:.02em}
+.pg-card-n{font-size:26px;font-weight:800;color:#e6ecf6;line-height:1;letter-spacing:-.02em}
+.pg-card-val{font-size:18px;font-weight:700;color:#c3ccdb;line-height:1;font-variant-numeric:tabular-nums}
+.pg-card-lab{font-size:10px;color:#7c8698;line-height:1;white-space:nowrap}
 .pg-card.free{
   --p:100%;--fill:linear-gradient(180deg,rgba(63,208,122,.40),rgba(63,208,122,.18));
   background:rgba(63,208,122,.05);
   border-color:rgba(63,208,122,.6);box-shadow:0 0 26px -10px rgba(63,208,122,.9);
 }
-.pg-card.free .pg-card-id b{color:#bdf5d3}
+.pg-card.free .pg-card-id{color:#bdf5d3}
+.pg-card.free .pg-card-n{color:#3fd07a}
 .pg-card.free .pg-card-val{color:#3fd07a}
 .pg-card.free .pg-card-lab{color:#5fd08c}
 .pg-card.soon{
@@ -176,7 +176,7 @@ body::before{
 .pg-card.over .pg-card-val{color:#ff8080}
 .pg-card.over .pg-card-lab{color:#c98a8a}
 .pg-card.smart{--fill:rgba(255,255,255,.055)}
-.pg-card.smart .pg-card-val{color:#8e99ab;font-size:17px}
+.pg-card.smart .pg-card-val{color:#8e99ab;font-size:16px}
 .pg-card.smart .pg-card-lab{color:#66707f}
 
 /* ============ 课表 ============ */
@@ -765,7 +765,8 @@ function plugShell(){
     const tag = d.tag || d.name.replace(/^荟园\d+栋/, "").replace(/号$/, "");
     d.ports.forEach(p => {
       html += `<div class="pg-card" data-di="${di}" data-pn="${p.n}">`
-        + `<div class="pg-card-id"><b>${tag}</b><i>${p.n}</i></div>`
+        + `<div class="pg-card-id">${tag}</div>`
+        + `<div class="pg-card-n">${p.n}</div>`
         + `<div class="pg-card-val">--</div>`
         + `<div class="pg-card-lab">·</div></div>`;
     });
@@ -1487,8 +1488,8 @@ function drawElo(matches, curElo, color){
   placeLatestCard(xy, W, H);
 }
 
-/* 悬浮卡片自动选角落：折线在四个角哪块最空就待在哪，差异不明显时不挪窝 */
-let __ltSpot = -1, __ltScore = Infinity;
+/* 悬浮卡片自动选角落：优先顺序 右上 → 右下 → 左下 → 左上，前一个被挡明显才顺延 */
+let __ltSpot = -1, __ltBlock = Infinity;
 function placeLatestCard(xy, W, H){
   const card = $("ltCard");
   if (!card || card.style.display === "none") return;
@@ -1496,32 +1497,39 @@ function placeLatestCard(xy, W, H){
   const ch = card.offsetHeight || 62;
   const gap = 4;
   const spots = [
-    { x: W - cw - 2, y: gap },
-    { x: 2, y: gap },
-    { x: W - cw - 2, y: H - ch - gap },
-    { x: 2, y: H - ch - gap },
+    { x: W - cw - 2, y: gap },              // 0 右上
+    { x: W - cw - 2, y: H - ch - gap },     // 1 右下
+    { x: 2, y: H - ch - gap },              // 2 左下
+    { x: 2, y: gap },                        // 3 左上
   ];
   const samples = [];
   for (let i = 1; i < xy.length; i++){
     const a = xy[i-1], b = xy[i];
-    for (let k = 0; k <= 6; k++){
-      samples.push({ x: a.x + (b.x - a.x) * k / 6, y: a.y + (b.y - a.y) * k / 6 });
+    for (let k = 0; k <= 14; k++){
+      samples.push({ x: a.x + (b.x - a.x) * k / 14, y: a.y + (b.y - a.y) * k / 14 });
     }
   }
-  let best = 0, bestScore = Infinity;
-  spots.forEach((s, i) => {
+  // 最新那个点权重大一些，尽量别盖住
+  const last = xy[xy.length - 1];
+  for (let i = 0; i < 6; i++) samples.push(last);
+
+  const scores = spots.map(s => {
     let n = 0;
     for (const p of samples){
       if (p.x >= s.x - 8 && p.x <= s.x + cw + 8 && p.y >= s.y - 8 && p.y <= s.y + ch + 8) n++;
     }
-    n += i * 0.01;                                   // 平手时优先右上 > 左上 > 右下 > 左下
-    if (n < bestScore){ bestScore = n; best = i; }
+    return n;
   });
-  if (best === __ltSpot) return;
-  if (__ltSpot >= 0 && bestScore > __ltScore - 5) return;  // 迟滞，避免来回跳
-  __ltSpot = best;
-  __ltScore = bestScore;
-  const s = spots[best];
+
+  const TOL = 1;                                   // 遮挡 1 个采样点以内认为「这块是空的」
+  let pick = scores.findIndex(v => v <= TOL);
+  if (pick < 0) pick = scores.indexOf(Math.min.apply(null, scores));
+
+  if (pick === __ltSpot) return;
+  if (__ltSpot >= 0 && scores[pick] > __ltBlock - 3) return;   // 换过去也好不了多少就不挪
+  __ltSpot = pick;
+  __ltBlock = scores[pick];
+  const s = spots[pick];
   card.style.right = "auto";
   card.style.left = Math.max(0, Math.min(Math.round(s.x), W - cw)) + "px";
   card.style.top = Math.round(s.y) + "px";
