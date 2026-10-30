@@ -32,7 +32,7 @@ body::before{
 }
 .board{
   position:relative;z-index:1;height:100vh;height:100dvh;
-  display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(14,1fr);
+  display:grid;grid-template-columns:11fr 13fr;grid-template-rows:repeat(15,1fr);
   gap:15px;padding:17px;
 }
 .tile{
@@ -50,18 +50,18 @@ body::before{
 }
 @keyframes tileIn{0%{opacity:0;transform:translateY(28px) scale(.955)}60%{opacity:1}100%{opacity:1;transform:none}}
 
-.clock{grid-area:1/1/5/7;animation-delay:.04s}
-.weather{grid-area:5/1/9/7;animation-delay:.1s}
-.schedule{grid-area:9/1/15/7;animation-delay:.16s}
-.mcsr{grid-area:1/7/6/13;animation-delay:.22s}
-.swap{grid-area:6/7/15/13;animation-delay:.28s;padding:0;overflow:hidden}
+.clock{grid-area:1/1/6/2;animation-delay:.04s}
+.weather{grid-area:6/1/11/2;animation-delay:.1s}
+.schedule{grid-area:11/1/16/2;animation-delay:.16s}
+.mcsr{grid-area:1/2/6/3;animation-delay:.22s}
+.swap{grid-area:6/2/16/3;animation-delay:.28s;padding:0;overflow:hidden}
 
 /* ============ 时钟 ============ */
 .clock{flex-direction:row;align-items:center;gap:26px}
 .dial{width:clamp(112px,19.5vh,176px);flex:0 0 auto;aspect-ratio:1/1}
 .dial svg{width:100%;height:100%;display:block;overflow:visible}
 .clock-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.c-date{font-size:clamp(22px,3.4vh,33px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
+.c-date{font-size:clamp(20px,3.0vh,29px);font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.15}
 .c-date b{color:#fff}
 .c-sub{font-size:clamp(14px,2vh,18px);color:var(--dim);letter-spacing:.02em}
 .c-time{font-size:clamp(32px,5.4vh,54px);font-weight:600;letter-spacing:-.03em;line-height:1;margin-top:6px}
@@ -90,8 +90,13 @@ body::before{
 }
 .w-fact{font-size:13px;color:var(--dim-2)}
 .w-fact b{color:#c4cddd;font-weight:600}
-.w-chart{position:relative;flex:1;min-height:56px;margin-top:6px}
-.w-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.w-chart{
+  position:relative;flex:1;min-height:96px;margin-top:4px;
+  overflow-x:auto;overflow-y:hidden;touch-action:pan-x;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.w-chart::-webkit-scrollbar{display:none}
+.w-chart svg{display:block;height:100%;overflow:visible}
 .w-sun{
   display:flex;align-items:center;gap:22px;padding-top:8px;margin-top:2px;
   border-top:1px solid var(--line-soft);font-size:13px;color:var(--dim-2);
@@ -103,15 +108,16 @@ body::before{
 .ws-ic.set{color:#ff8f61}
 
 /* ============ 课表 ============ */
-.schedule{padding:15px 17px 34px;justify-content:center}
-.sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
-.sc-title{font-size:16px;font-weight:700;color:#e6ecf6}
-.sc-sub{font-size:13px;color:var(--dim-2)}
-.sc-sep{height:1px;background:var(--line-soft);margin:7px 0}
+.schedule{padding:13px 15px 14px;justify-content:flex-start}
+.sc-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.sc-title{font-size:14.5px;font-weight:700;color:#e6ecf6}
+.sc-sub{font-size:12px;color:var(--dim-2)}
+.sc-sep{height:1px;background:var(--line-soft);margin:6px 0}
 .sc-list{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
 .sc-item{
   flex:1 1 190px;min-width:0;
-  display:flex;gap:10px;align-items:center;padding:7px 12px;border-radius:14px;
+  display:flex;flex-direction:column;justify-content:center;gap:1px;
+  padding:6px 11px;border-radius:12px;
   background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.045);
   animation:scIn .65s cubic-bezier(.19,1.28,.32,1) both;
 }
@@ -120,48 +126,48 @@ body::before{
   background:linear-gradient(100deg,rgba(255,171,94,.16),rgba(255,171,94,.05));
   border-color:rgba(255,171,94,.34);box-shadow:0 0 30px -12px rgba(255,171,94,.6);
 }
-.sc-p{flex:0 0 auto;width:46px;display:flex;flex-direction:column;align-items:center;gap:0}
-.sc-p .n{font-size:16px;font-weight:700;color:#eef1f7;line-height:1.15}
-.sc-p .r{font-size:10.5px;color:var(--dim-2);line-height:1.25}
-.sc-p .r2{font-size:10.5px;color:#7a8496;line-height:1.25}
-.sc-item.live .sc-p .n{color:var(--warm)}
-.sc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .sc-name{
-  font-size:17px;font-weight:600;color:#fff;line-height:1.18;
+  font-size:16.5px;font-weight:600;color:#fff;line-height:1.2;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .sc-name .tag{
   font-size:10px;font-weight:600;padding:1px 5px;border-radius:5px;margin-left:6px;
   background:rgba(255,255,255,.08);color:var(--dim);vertical-align:2px;
 }
-.sc-where{font-size:12.5px;color:#a9b3c6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
-.sc-where b{color:#dbe3f0;font-weight:600}
-.sc-where i{font-style:normal;color:var(--dim-2)}
-.schedule.dense .sc-name{font-size:15.5px}
-.schedule.dense .sc-item{padding:5px 11px}
-.schedule.dense .sc-where{font-size:11.5px}
+.sc-where{
+  font-size:12px;color:#8e99ab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.3;display:flex;align-items:baseline;gap:9px;
+}
+.sc-where b{color:#c6d0df;font-weight:600}
+.sc-time{
+  font-style:normal;font-weight:700;color:var(--warm);letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;
+}
+.schedule.dense .sc-name{font-size:15px}
+.schedule.dense .sc-item{padding:4px 10px}
+.schedule.dense .sc-where{font-size:11px}
 .sc-empty{
-  flex:1 1 100%;display:flex;align-items:center;justify-content:center;min-height:46px;max-height:84px;
-  font-size:13px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
-  border-radius:14px;letter-spacing:.03em;
+  flex:1 1 100%;display:flex;align-items:center;justify-content:center;min-height:28px;max-height:38px;
+  font-size:12px;color:var(--dim-2);border:1px dashed rgba(255,255,255,.08);
+  border-radius:12px;letter-spacing:.03em;
 }
 .sc-foot{
-  position:absolute;left:17px;right:17px;bottom:12px;
+  margin-top:auto;padding-top:9px;
   font-size:12px;color:var(--dim-2);
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
 }
 .sc-foot b{color:#b3bccf;font-weight:600}
 .sc-foot .nx{color:var(--warm);font-weight:600}
 
 /* ============ MCSR ============ */
-.mcsr{flex-direction:row;align-items:center;gap:26px;padding:22px 26px}
+.mcsr{flex-direction:row;align-items:center;gap:24px;padding:18px 26px}
 .mc-head{width:clamp(100px,16vh,158px);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .mc-head img{
   width:100%;height:auto;display:block;filter:drop-shadow(0 18px 30px rgba(0,0,0,.8));
   animation:headFloat 6s ease-in-out infinite;
 }
 @keyframes headFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-.mc-body{flex:1;display:flex;flex-direction:column;min-width:0;gap:13px;justify-content:center}
+.mc-body{flex:1;display:flex;flex-direction:column;min-width:0;gap:10px;justify-content:center}
 .mc-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mc-rank{font-size:clamp(20px,2.9vh,29px);font-weight:700;color:var(--dim)}
 .mc-flag{font-size:clamp(16px,2.2vh,21px)}
@@ -181,7 +187,7 @@ body::before{
 .mc-elo b{color:#fff;font-weight:700;font-size:1.2em}
 .mc-peak{font-size:clamp(13px,1.8vh,17px);color:var(--dim-2)}
 .mc-peak b{color:var(--dim);font-weight:600}
-.mc-rows{display:flex;flex-direction:column;gap:9px}
+.mc-rows{display:flex;flex-direction:column;gap:7px}
 .mc-row{display:flex;align-items:baseline;gap:12px;min-width:0}
 .mc-tag{
   flex:0 0 auto;font-size:11.5px;letter-spacing:.12em;font-weight:700;color:var(--dim-2);
@@ -215,7 +221,7 @@ body::before{
 .pane.active{transform:translateY(0);opacity:1;pointer-events:auto}
 .pane.out-down{transform:translateY(107%);opacity:0}
 
-.ch-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.ch-head{display:flex;align-items:baseline;justify-content:flex-end;margin-bottom:6px}
 .ch-title{font-size:16px;font-weight:700;color:#e6ecf6}
 .ch-delta{font-size:16px;font-weight:700}
 .ch-wrap{position:relative;flex:1;min-height:0}
@@ -224,8 +230,7 @@ body::before{
 .ch-y.hi{top:0}
 .ch-y.lo{bottom:0}
 
-.mt-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
-.mt-title{font-size:16px;font-weight:700;color:#e6ecf6}
+.mt-head{display:flex;align-items:baseline;justify-content:flex-end;margin-bottom:9px}
 .mt-sum{font-size:14.5px;color:var(--dim);font-weight:600;white-space:nowrap}
 .mt-sum b{font-weight:700;margin:0 3px}
 .mt-sum .w{color:var(--win)}
@@ -233,20 +238,20 @@ body::before{
 .mt-sum .d{color:var(--draw)}
 .mt-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
 .mt-row{
-  display:grid;grid-template-columns:62px minmax(0,1fr) 70px 26px 26px 70px;
+  display:grid;grid-template-columns:minmax(0,1fr) 58px 66px 26px 26px 54px;
   align-items:center;gap:10px;padding:3px 12px;border-radius:11px;
   background:rgba(255,255,255,.026);border:1px solid rgba(255,255,255,.035);
   animation:mtIn .55s cubic-bezier(.19,1.28,.32,1) both;
 }
 @keyframes mtIn{0%{opacity:0;transform:translateY(9px)}100%{opacity:1;transform:none}}
-.mt-res{font-size:12px;font-weight:800;letter-spacing:.08em;text-align:center;padding:4px 0;border-radius:7px}
-.mt-res.WIN{color:#08200f;background:var(--win)}
-.mt-res.LOSE{color:#2c0709;background:var(--lose)}
-.mt-res.DRAW{color:#03121f;background:var(--draw)}
+.mt-res{font-size:12.5px;font-weight:800;letter-spacing:.09em;text-align:center}
+.mt-res.WIN{color:var(--win)}
+.mt-res.LOSE{color:var(--lose)}
+.mt-res.DRAW{color:var(--draw)}
 .mt-opp{
   font-size:14px;color:#dde4f0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.mt-time{font-size:14.5px;font-weight:600;color:#fff;text-align:right}
+.mt-time{font-size:14.5px;font-weight:600;color:#fff;text-align:center}
 .mt-time.dim{color:#8d96a9}
 .ic{
   width:24px;height:24px;border-radius:5px;
@@ -263,7 +268,7 @@ body::before{
 .ic.i7{background-position:50% 100%}
 .ic.i8{background-position:75% 100%}
 .ic.i9{background-position:100% 100%}
-.mt-ago{font-size:12.5px;color:var(--dim-2);text-align:right}
+.mt-ago{font-size:12.5px;color:var(--dim-2);text-align:right;font-variant-numeric:tabular-nums}
 
 /* ============ 竖屏 ============ */
 @media (orientation:portrait){
@@ -380,7 +385,6 @@ body::before{
   <section class="tile swap">
     <div class="pane active" id="paneChart">
       <div class="ch-head">
-        <span class="ch-title">ELO · 最近 20 场</span>
         <span class="ch-delta" id="chDelta">—</span>
       </div>
       <div class="ch-wrap">
@@ -405,7 +409,6 @@ body::before{
 
     <div class="pane" id="paneList">
       <div class="mt-head">
-        <span class="mt-title" id="mtTitle">近 10 场</span>
         <span class="mt-sum" id="mtSum">—</span>
       </div>
       <div class="mt-list" id="mtList"></div>
@@ -465,11 +468,13 @@ const store = {
 };
 function ago(ts){
   const s = Date.now()/1000 - ts;
-  if (s < 90) return "刚刚";
-  if (s < 3600) return Math.floor(s/60) + " 分钟前";
-  if (s < 86400) return Math.floor(s/3600) + " 小时前";
-  if (s < 86400*30) return Math.floor(s/86400) + " 天前";
-  return Math.floor(s/86400/30) + " 个月前";
+  if (s < 60) return "now";
+  if (s < 3600) return Math.floor(s/60) + "min";
+  if (s < 86400) return Math.floor(s/3600) + "hr";
+  if (s < 86400*7) return Math.floor(s/86400) + "d";
+  if (s < 86400*30) return Math.floor(s/86400/7) + "w";
+  if (s < 86400*365) return Math.floor(s/86400/30) + "m";
+  return Math.floor(s/86400/365) + "y";
 }
 
 /* ============ 课表 ============ */
@@ -561,11 +566,8 @@ function courseHTML(c, live, idx){
   const st = periodTime(c.s), et = periodTime(c.e);
   const span = c.e > c.s ? `${c.s}-${c.e}` : `${c.s}`;
   return `<div class="sc-item${live ? " live" : ""}" style="animation-delay:${idx*55}ms">
-    <div class="sc-p"><span class="n">${span}</span><span class="r">${st.a}</span><span class="r2">${et.b}</span></div>
-    <div class="sc-main">
-      <span class="sc-name">${c.n}${c.t && c.t !== "讲课" ? `<span class="tag">${c.t}</span>` : ""}</span>
-      <span class="sc-where"><b>${c.p}</b> · <i>${c.tc}</i></span>
-    </div>
+    <span class="sc-name">${c.n}${c.t && c.t !== "讲课" ? `<span class="tag">${c.t}</span>` : ""}</span>
+    <span class="sc-where"><b>${c.p}</b><em class="sc-time">${st.a}–${et.b}</em></span>
   </div>`;
 }
 function nextClass(){
@@ -697,10 +699,14 @@ function paintWeather(d){
 function drawWeather(h, idx){
   if (!idx.length) return;
   const wrap = document.querySelector(".w-chart");
-  const rc = wrap.getBoundingClientRect();
-  const W = Math.max(240, Math.round(rc.width));
-  const H = Math.max(90, Math.round(rc.height));
-  $("wSvg").setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const cw = Math.max(240, wrap.clientWidth || 240);
+  const H = Math.max(90, wrap.clientHeight || 120);
+  // 12 小时数据画成约 2.1 倍宽，首屏正好看 6 个小时，其余横滑
+  const W = Math.round(cw * 2.1);
+  const svg = $("wSvg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.width = W + "px";
+  svg.style.height = H + "px";
 
   const XL = 22, XR = 22, PT = 50, PB = 26;
   const plotW = W - XL - XR, plotH = H - PT - PB;
@@ -848,7 +854,7 @@ function drawElo(matches, curElo, color){
   const H = Math.max(90, Math.round(rc.height));
   $("eloSvg").setAttribute("viewBox", `0 0 ${W} ${H}`);
 
-  const XL = 44, XR = 26, PT = 20, PB = 22;
+  const XL = 44, XR = 26, PT = 14, PB = 16;
   const plotW = W - XL - XR, plotH = H - PT - PB;
   const vals = pts.map(p => p.v);
   let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -859,7 +865,7 @@ function drawElo(matches, curElo, color){
     const span = Math.max(hi-lo, 20);
     if (up.min <= hi + span*1.1){ hi = Math.max(hi, up.min); tierVal = up.min; }
   }
-  const padV = Math.max(4, (hi-lo)*0.10);
+  const padV = Math.max(3, (hi-lo)*0.05);
   lo -= padV; hi += padV;
   if (hi - lo < 20){ const c = (hi+lo)/2; lo = c-10; hi = c+10; }
 
@@ -1049,13 +1055,12 @@ function renderMatches(ms, season){
   const sl = g(season && season.loses, "ranked");
   const sp = g(season && season.playedMatches, "ranked") || (sw + sl);
   $("mtSum").innerHTML = `本季 <b>${sp}</b> 场 ·<b class="w">${sw}W</b><b class="l">${sl}L</b>`;
-  $("mtTitle").textContent = `近 ${list.length} 场`;
 
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
     return `<div class="mt-row" style="animation-delay:${i*38}ms">
-      <span class="mt-res ${x.outcome}">${x.outcome}</span>
       <span class="mt-opp">${x.opp}</span>
+      <span class="mt-res ${x.outcome}">${x.outcome}</span>
       <span class="${tc}">${ms2mmss(x.time)}</span>
       ${x.ovw >= 0 ? `<span class="ic i${x.ovw}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
       ${x.nth >= 0 ? `<span class="ic i${x.nth}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
@@ -1077,7 +1082,7 @@ function armSwap(){
 }
 function swapPanes(){
   const t = performance.now();
-  if (t - swapLock < 600){ armSwap(); return; }   // 动画没走完不接受新的切换
+  if (t - swapLock < 900){ armSwap(); return; }   // 动画没走完不接受新的切换
   swapLock = t;
 
   const panes = [$("paneChart"), $("paneList")];
@@ -1085,16 +1090,24 @@ function swapPanes(){
   const next = panes[1-swapIdx];
   swapIdx = 1 - swapIdx;
 
-  cur.classList.remove("active");
-  cur.classList.add("out-down");
-
-  next.classList.remove("out-down");
-  next.classList.add("in-top");
+  // 待机面板一律复位到上方，避免上一次动画的残留位置让入场方向忽上忽下
+  next.style.transition = "none";
+  next.style.transform = "translateY(-106%)";
+  next.style.opacity = "0";
+  next.style.pointerEvents = "none";
   void next.offsetWidth;
-  next.classList.remove("in-top");
-  next.classList.add("active");
+  next.style.transition = "";
 
-  setTimeout(() => cur.classList.remove("out-down"), 1000);
+  cur.style.transform = "translateY(107%)";
+  cur.style.opacity = "0";
+  cur.style.pointerEvents = "none";
+
+  requestAnimationFrame(() => {
+    next.style.transform = "translateY(0)";
+    next.style.opacity = "1";
+    next.style.pointerEvents = "auto";
+  });
+
   syncDots();
   armSwap();          // 手动滑动后也是从这一刻重新计时
 }
@@ -1140,8 +1153,10 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catc
 
 // 调试：#list 直接看列表页
 if (location.hash === "#list"){
-  $("paneChart").classList.remove("active");
-  $("paneList").classList.add("active");
+  const c = $("paneChart"), l = $("paneList");
+  c.classList.remove("active"); l.classList.add("active");
+  c.style.transform = "translateY(-106%)"; c.style.opacity = "0";
+  l.style.transform = "translateY(0)"; l.style.opacity = "1"; l.style.pointerEvents = "auto";
   swapIdx = 1;
   syncDots();
 }
