@@ -1,4 +1,4 @@
-const CACHE = "board-v30";
+const CACHE = "board-v31";
 const ASSETS = ["./", "./index.html"];
 
 self.addEventListener("install", e => {
