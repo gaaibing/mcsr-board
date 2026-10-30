@@ -219,12 +219,19 @@ body::before{
 .mc-tag{font-size:11px;letter-spacing:.15em;font-weight:800;color:var(--dim);text-transform:uppercase}
 .mc-vals{
   font-size:clamp(12px,1.7vh,14px);color:#b6c0d3;
-  display:grid;grid-template-columns:1fr 1fr;column-gap:9px;row-gap:1px;min-width:0;
+  display:grid;grid-template-columns:1fr 1fr;column-gap:0;row-gap:1px;min-width:0;
+  position:relative;
+}
+/* 块内中线的小竖线 */
+.mc-vals::before{
+  content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:rgba(255,255,255,.09);
 }
 .mc-vals .v{
   display:flex;align-items:baseline;justify-content:space-between;gap:5px;
-  white-space:nowrap;overflow:hidden;
+  white-space:nowrap;overflow:hidden;padding-right:10px;
 }
+.mc-vals .v:nth-child(even){padding-right:0;padding-left:10px}
 .mc-vals b{color:#fff;font-weight:700}
 .mc-vals i{font-style:normal;color:var(--dim-2);font-size:.92em}
 
@@ -865,13 +872,13 @@ function statLine(s, side){
   const wr = (w+l) > 0 ? Math.round(w/(w+l)*100) : 0;
   const avg = comp > 0 ? Math.round(compTime/comp) : 0;
   const fr = played > 0 ? Math.round(ff/played*100) : 0;
-  // 左侧块：数字在左、标签在右；右侧块镜像过来，保证两侧数字都靠外
-  const cell = (num, label) => side === "R"
-    ? `<span class="v"><i>${label}</i><b>${num}</b></span>`
-    : `<span class="v"><b>${num}</b><i>${label}</i></span>`;
-  return cell(`${wr}%`, "wr") + cell(`${fr}%`, "ffr")
-       + cell(ms2mmss(pb), "pb") + cell(`${streak}`, "bws")
-       + cell(ms2mmss(avg), "avg") + `<span class="v"></span>`;
+  // 每块内部两格：左格「数字在左、标签贴中线」，右格「标签贴中线、数字在右」，
+  // SEASON 与 TOTAL 用完全相同的排法，不再镜像
+  const L = (num, label) => `<span class="v"><b>${num}</b><i>${label}</i></span>`;
+  const R = (num, label) => `<span class="v"><i>${label}</i><b>${num}</b></span>`;
+  return L(`${wr}%`, "wr") + R(`${fr}%`, "ffr")
+       + L(ms2mmss(pb), "pb") + R(`${streak}`, "bws")
+       + L(ms2mmss(avg), "avg") + `<span class="v"></span>`;
 }
 function applyTier(elo){
   const {tier, label} = tierOf(elo);
