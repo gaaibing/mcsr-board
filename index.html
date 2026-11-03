@@ -354,6 +354,7 @@ body::before{
 .lt-res.WIN{color:var(--win)}
 .lt-res.LOSE{color:var(--lose)}
 .lt-res.DRAW{color:var(--draw)}
+.lt-res.casual{color:#8d96a9}
 .lt-time{font-size:13.5px;font-weight:700;color:#c9d2e0}
 .lt-ago{margin-left:auto;font-size:11px;color:var(--dim-2);font-weight:600}
 .lt-opp{font-size:12.5px;color:var(--dim-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -402,7 +403,17 @@ body::before{
 .mt-res.LOSE{color:var(--lose)}
 .mt-res.DRAW{color:var(--draw)}
 .mt-opp{
-  font-size:14px;color:#dde4f0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  display:flex;align-items:center;gap:7px;min-width:0;
+  font-size:14px;color:#dde4f0;font-weight:500;white-space:nowrap;
+}
+.mt-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:inherit}
+/* 私房 / 休闲（API type≠2）：整行降调，胜负不上色 */
+.mt-row.casual{background:rgba(255,255,255,.012);border-color:rgba(255,255,255,.02);opacity:.6}
+.mt-row.casual .mt-res{color:#8d96a9}
+.mt-tag{
+  flex:0 0 auto;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.1em;
+  color:#8d96a9;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);
+  padding:1px 5px;border-radius:5px;
 }
 .mt-time{font-size:14.5px;font-weight:600;color:#fff;text-align:center}
 .mt-time.dim{color:#8d96a9}
@@ -1505,16 +1516,18 @@ function renderLatest(ms){
   const me = CFG.uuid;
   const res = m.result || {};
   const opp = (m.players || []).find(x => x.uuid !== me) || {};
+  // 私房/休闲场不计 elo，不按胜负呈现
+  const casual = m.type !== 2;
 
   let outcome = "DRAW";
   if (res.uuid) outcome = res.uuid === me ? "WIN" : "LOSE";
-  $("ltRes").textContent = outcome === "WIN" ? "WON" : outcome === "LOSE" ? "LOST" : "DRAW";
-  $("ltRes").className = "lt-res " + outcome;
+  $("ltRes").textContent = casual ? "CASUAL" : outcome === "WIN" ? "WON" : outcome === "LOSE" ? "LOST" : "DRAW";
+  $("ltRes").className = "lt-res " + (casual ? "casual" : outcome);
 
   const ff = !!(m.forfeited && res.uuid);
   $("ltTime").textContent = ff ? "FORFEIT" : ms2mmss(res.time || 0);
   $("ltAgo").textContent = ago(m.date);
-  $("ltOpp").textContent = opp.nickname || "—";
+  $("ltOpp").textContent = opp.nickname || "SOLO";
 
   const seed = m.seed || {};
   const setMap = (el, k, map) => {
@@ -1532,11 +1545,11 @@ function renderLatest(ms){
   const after = (before !== null && delta !== null) ? before + delta : null;
 
   const t = tierOf(after !== null ? after : (__eloNow || 0));
-  $("ltTier").textContent = t.label.toUpperCase();
+  $("ltTier").textContent = casual ? "UNRANKED" : t.label.toUpperCase();
   $("ltElo").textContent = after !== null ? after : "—";
   $("ltDelta").innerHTML = (delta === null || before === null) ? ""
     : `<b class="${delta >= 0 ? "up" : "down"}">${delta > 0 ? "+" : ""}${delta}</b> from ${before}`;
-  card.style.setProperty("--tier", t.tier.color);
+  card.style.setProperty("--tier", casual ? "#8d96a9" : t.tier.color);
 }
 
 function renderMatches(ms, season){
@@ -1553,9 +1566,13 @@ function renderMatches(ms, season){
     const ff = !!(m.forfeited && res && res.uuid);
     const timeMs = (res && res.time) || 0;
     const seed = m.seed || {};
+    // type: 2=排位，其余（3=私房/休闲）不计 elo，也不进 season 统计
+    const casual = m.type !== 2;
     return {
       outcome,
-      opp: opp.nickname || "—",
+      casual,
+      solo: !opp.nickname,
+      opp: opp.nickname || "SOLO",
       time: timeMs,
       ff,
       ovw: (seed.overworld in OVW_IDX) ? OVW_IDX[seed.overworld] : -1,
@@ -1577,8 +1594,8 @@ function renderMatches(ms, season){
 
   $("mtList").innerHTML = list.map((x,i) => {
     const tc = x.outcome === "WIN" ? "mt-time" : "mt-time dim";
-    return `<div class="mt-row" style="animation-delay:${i*38}ms">
-      <span class="mt-opp">${esc(x.opp)}</span>
+    return `<div class="mt-row${x.casual ? " casual" : ""}" style="animation-delay:${i*38}ms">
+      <span class="mt-opp"><b class="mt-nm">${esc(x.opp)}</b>${x.casual ? `<i class="mt-tag">CASUAL</i>` : ""}</span>
       <span class="mt-res ${x.outcome}">${x.outcome}</span>
       ${x.ff ? `<span class="mt-time ff">FORFEIT</span>` : `<span class="${tc}">${ms2mmss(x.time)}</span>`}
       ${x.ovw >= 0 ? `<span class="ic i${x.ovw}"></span>` : `<span class="ic" style="background-image:none;background:rgba(255,255,255,.05)"></span>`}
