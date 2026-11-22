@@ -389,24 +389,25 @@ body::before{
 .mt-k .w{color:var(--win)}
 .mt-k .l{color:var(--lose)}
 .mt-k .d{color:var(--draw)}
-.mt-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.mt-list{flex:1;min-height:0;display:flex;flex-direction:column;gap:5px;overflow:hidden}
 .mt-row{
-  display:grid;grid-template-columns:minmax(0,1fr) 58px 66px 26px 26px 54px;
-  align-items:center;gap:10px;padding:3px 12px;border-radius:11px;
+  display:grid;grid-template-columns:minmax(0,1fr) 62px 72px 26px 26px 56px;
+  align-items:center;gap:10px;padding:0 12px;border-radius:10px;
+  flex:1 1 0;min-height:0;
   background:rgba(255,255,255,.026);border:1px solid rgba(255,255,255,.035);
   animation:mtIn .55s cubic-bezier(.19,1.28,.32,1) both;
 }
 @keyframes mtIn{0%{opacity:0;transform:translateY(9px)}100%{opacity:1;transform:none}}
-.mt-res{font-size:12.5px;font-weight:800;letter-spacing:.09em;text-align:center}
+.mt-res{font-size:14px;font-weight:800;letter-spacing:.09em;text-align:center}
 .mt-res.WIN{color:var(--win)}
 .mt-res.LOSE{color:var(--lose)}
 .mt-res.DRAW{color:var(--draw)}
 .mt-opp{
   display:flex;align-items:center;gap:7px;min-width:0;
-  font-size:14px;color:#dde4f0;font-weight:500;white-space:nowrap;
+  font-size:16px;color:#dde4f0;font-weight:500;white-space:nowrap;
 }
 .mt-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:inherit}
-.mt-time{font-size:14.5px;font-weight:600;color:#fff;text-align:center}
+.mt-time{font-size:17px;font-weight:600;color:#fff;text-align:center}
 .mt-time.dim{color:#8d96a9}
 .ic{
   width:24px;height:24px;border-radius:5px;
@@ -423,8 +424,8 @@ body::before{
 .ic.i7{background-position:50% 100%}
 .ic.i8{background-position:75% 100%}
 .ic.i9{background-position:100% 100%}
-.mt-time.ff{font-size:11px;font-weight:800;letter-spacing:.07em;color:#7c8698;text-align:center}
-.mt-ago{font-size:12.5px;color:var(--dim-2);text-align:right;font-variant-numeric:tabular-nums}
+.mt-time.ff{font-size:12px;font-weight:800;letter-spacing:.07em;color:#7c8698;text-align:center}
+.mt-ago{font-size:13.5px;color:var(--dim-2);text-align:right;font-variant-numeric:tabular-nums}
 
 /* ============ 竖屏 ============ */
 @media (orientation:portrait){
