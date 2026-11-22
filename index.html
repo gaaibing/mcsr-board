@@ -1317,20 +1317,23 @@ function drawElo(matches, curElo, color){
   let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
 
   const up = TIERS.find(t => t.min > curElo) || null;
-  let tierVal = null;
   if (up){
     const span = Math.max(hi-lo, 20);
-    if (up.min <= hi + span*1.1){ hi = Math.max(hi, up.min); tierVal = up.min; }
+    // 目标段位只在确实接近时才画进来。拉得太远（比如 1016 去够 1200）
+    // 会把纵轴撑成大片空白，折线被压平成波浪
+    if (up.min - (curElo ?? hi) <= 120 && up.min <= hi + span * 0.7){
+      hi = Math.max(hi, up.min);
+    }
   }
-  const padV = Math.max(5, (hi-lo)*0.22);
+  const padV = Math.max(6, (hi - lo) * 0.08);
   lo -= padV; hi += padV;
   if (hi - lo < 20){ const c = (hi+lo)/2; lo = c-10; hi = c+10; }
 
-  // 纵轴步长：取 10 的整数倍；上下边界再对齐到刻度，
-  // 这样网格正好铺满整个绘图区，折线任何一处上下都有虚线
-  const rawStep = (hi - lo) / 5;
-  const mag = Math.pow(10, Math.floor(Math.log10(Math.max(rawStep, 1))));
-  const step = Math.max(10, Math.ceil(rawStep / mag) * mag);
+  // 步长不绑死整十整百：从常用档里挑一个让刻度落在 4~6 条的，
+  // 分差小时走 5/10，分差大时走 100/200，纵轴始终贴着数据
+  const STEPS = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
+  const spanV = hi - lo;
+  const step = STEPS.find(s => spanV / s <= 5) || 2000;
   lo = Math.floor(lo / step) * step;
   hi = Math.ceil(hi / step) * step;
 
